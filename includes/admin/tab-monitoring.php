@@ -131,22 +131,24 @@ function sp_render_monitoring_tab() {
 function sp_render_distribution_chart() {
     global $wpdb;
 
-    // Get the distribution for the next 30 days
+    // Span the next 3 months. Grouped by week (rather than by day) so the
+    // chart stays readable: ~13 bars instead of ~90 unreadable thin ones.
     // IMPORTANT: compare DATE(post_date), not raw post_date, against the
     // upper bound — comparing a datetime (e.g. "2026-10-03 14:23:07") to
-    // "2026-10-03 00:00:00" would exclude every post on day 30 published
-    // after midnight.
-    $distribution = $wpdb->get_results("
-        SELECT DATE(post_date) as date, COUNT(*) as count
+    // "2026-10-03 00:00:00" would exclude every post on the last day
+    // published after midnight.
+    $range_days = 90;
+
+    $distribution = $wpdb->get_results($wpdb->prepare("
+        SELECT DATE_SUB(DATE(post_date), INTERVAL WEEKDAY(post_date) DAY) as week_start, COUNT(*) as count
         FROM {$wpdb->posts}
         WHERE post_status = 'future'
         AND post_type = 'post'
         AND DATE(post_date) >= CURDATE()
-        AND DATE(post_date) <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-        GROUP BY DATE(post_date)
-        ORDER BY post_date
-        LIMIT 30
-    ", ARRAY_A);
+        AND DATE(post_date) <= DATE_ADD(CURDATE(), INTERVAL %d DAY)
+        GROUP BY week_start
+        ORDER BY week_start
+    ", $range_days), ARRAY_A);
 
     if (empty($distribution)) {
         return;
@@ -158,21 +160,22 @@ function sp_render_distribution_chart() {
     <div class="sp-card">
         <h2 class="sp-card-title">
             <span class="dashicons dashicons-chart-bar"></span>
-            Distribution Over the Next 30 Days
+            Distribution Over the Next 3 Months (by week)
         </h2>
 
         <div class="sp-distribution-chart">
-            <?php foreach ($distribution as $day): ?>
+            <?php foreach ($distribution as $week): ?>
                 <?php
-                $percentage = ($day['count'] / $max_count) * 100;
-                $date_obj = new DateTime($day['date']);
+                $percentage = ($week['count'] / $max_count) * 100;
+                $week_start = new DateTime($week['week_start']);
+                $week_end = (clone $week_start)->modify('+6 days');
                 ?>
-                <div class="sp-chart-bar" title="<?php echo $day['count']; ?> posts">
+                <div class="sp-chart-bar" title="<?php echo esc_attr($week['count']); ?> posts (<?php echo esc_attr($week_start->format('d/m')); ?> - <?php echo esc_attr($week_end->format('d/m')); ?>)">
                     <div class="sp-chart-bar-fill" style="height: <?php echo $percentage; ?>%;"></div>
                     <div class="sp-chart-bar-label">
-                        <?php echo $date_obj->format('d/m'); ?>
+                        <?php echo $week_start->format('d/m'); ?>
                     </div>
-                    <div class="sp-chart-bar-value"><?php echo $day['count']; ?></div>
+                    <div class="sp-chart-bar-value"><?php echo $week['count']; ?></div>
                 </div>
             <?php endforeach; ?>
         </div>
