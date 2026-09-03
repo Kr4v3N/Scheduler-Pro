@@ -311,6 +311,14 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.sp-input-wide {
+    max-width: 320px;
+}
+
+.sp-form-col {
+    margin-top: 15px;
+}
+
 .sp-input-number:focus,
 .sp-input-time:focus {
     border-color: var(--sp-primary);

@@ -21,6 +21,12 @@ class SP_Heartbeat_Monitor {
     const ALERT_THRESHOLD_HOURS = 25; // 25h = 1 day + margin
 
     /**
+     * Minimum delay between two alert emails, to avoid spamming the
+     * recipient while the scheduler stays critical.
+     */
+    const ALERT_EMAIL_THROTTLE_HOURS = 24;
+
+    /**
      * Record a heartbeat (called on every run)
      */
     public static function ping() {
@@ -189,6 +195,57 @@ class SP_Heartbeat_Monitor {
         }
 
         return $issues;
+    }
+
+    /**
+     * Send an email alert when the scheduler is critical (see
+     * check_wp_cron_health()), throttled to at most one email every
+     * ALERT_EMAIL_THROTTLE_HOURS.
+     *
+     * IMPORTANT: hooked on admin_init, not on the plugin's own cron
+     * events - if WP-Cron itself is what's broken (the exact situation
+     * this alert exists to report), a cron-triggered check would never
+     * fire. Running on admin_init instead means the very next admin page
+     * load after things break will send the alert.
+     */
+    public static function maybe_send_alert_email() {
+        if (get_option('sp_email_alerts', '1') !== '1') {
+            return;
+        }
+
+        $health = self::check_wp_cron_health();
+        if ($health['status'] !== 'critical') {
+            return;
+        }
+
+        $last_sent = (int) get_option('sp_last_alert_sent', 0);
+        $throttle_seconds = self::ALERT_EMAIL_THROTTLE_HOURS * HOUR_IN_SECONDS;
+
+        if ($last_sent && (time() - $last_sent) < $throttle_seconds) {
+            return;
+        }
+
+        $to = get_option('sp_alert_email');
+        if (empty($to)) {
+            $to = get_option('admin_email');
+        }
+
+        $subject = sprintf('[%s] Scheduler Pro: scheduler inactive', get_bloginfo('name'));
+        $body = sprintf(
+            "Scheduler Pro has not run in over %d hours.\n\n%s\n\nCheck the Monitoring tab: %s",
+            self::ALERT_THRESHOLD_HOURS,
+            $health['description'],
+            admin_url('admin.php?page=scheduler-pro&tab=monitoring')
+        );
+
+        $sent = wp_mail($to, $subject, $body);
+
+        if ($sent) {
+            update_option('sp_last_alert_sent', time());
+            sp_log("📧 Alert email sent to {$to} (scheduler critical)", 'WARNING');
+        } else {
+            sp_log("❌ Failed to send the alert email to {$to}", 'ERROR');
+        }
     }
 
     /**
@@ -398,6 +455,10 @@ add_action('sp_daily_schedule_event', array('SP_Heartbeat_Monitor', 'ping'));
 
 // Add the widget to the WordPress dashboard
 add_action('wp_dashboard_setup', array('SP_Heartbeat_Monitor', 'add_dashboard_widget'));
+
+// Check whether a critical-status alert email needs sending on every admin
+// page load (see maybe_send_alert_email() docblock for why not on cron)
+add_action('admin_init', array('SP_Heartbeat_Monitor', 'maybe_send_alert_email'));
 
 // Display the status widget in the admin
 add_action('admin_notices', function() {

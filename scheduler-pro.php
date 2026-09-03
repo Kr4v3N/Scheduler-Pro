@@ -113,6 +113,8 @@ function sp_activate_plugin() {
     add_option('sp_auto_mode', '1'); // Enabled by default
     add_option('sp_force_replan', '0');
     add_option('sp_excluded_categories', array());
+    add_option('sp_email_alerts', '1'); // Enabled by default
+    add_option('sp_alert_email', ''); // Empty = use the site's admin email
 
     // Record the installed version
     update_option('sp_version', SP_VERSION);

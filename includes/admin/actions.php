@@ -32,6 +32,10 @@ function sp_handle_admin_actions() {
             : array();
         update_option('sp_excluded_categories', $excluded_categories);
 
+        update_option('sp_email_alerts', isset($_POST['sp_email_alerts']) ? '1' : '0');
+        $alert_email = isset($_POST['sp_alert_email']) ? sanitize_email(wp_unslash($_POST['sp_alert_email'])) : '';
+        update_option('sp_alert_email', $alert_email);
+
         $message = array('type' => 'success', 'text' => '✅ Settings saved successfully!');
     }
 

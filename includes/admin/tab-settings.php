@@ -16,6 +16,8 @@ function sp_render_settings_tab($preview = null) {
     $auto_mode = get_option('sp_auto_mode', '1');
     $force_replan = get_option('sp_force_replan', '0');
     $excluded_categories = array_map('intval', (array) get_option('sp_excluded_categories', array()));
+    $email_alerts = get_option('sp_email_alerts', '1');
+    $alert_email = get_option('sp_alert_email', '');
     $total_future = (int) wp_count_posts()->future;
 
     // Average interval between two posts, in days (unifies all 3 units:
@@ -150,6 +152,35 @@ function sp_render_settings_tab($preview = null) {
                     </select>
                     <p class="sp-help-text">
                         Posts in a selected category are entirely skipped by the scheduler (Ctrl/Cmd-click to select several).
+                    </p>
+                </div>
+
+                <!-- Card: Email Alerts -->
+                <div class="sp-card">
+                    <h2 class="sp-card-title">
+                        <span class="dashicons dashicons-email-alt"></span>
+                        Email Alerts
+                    </h2>
+
+                    <label class="sp-checkbox-label">
+                        <input type="checkbox"
+                               name="sp_email_alerts"
+                               value="1"
+                               <?php checked($email_alerts, '1'); ?>>
+                        <span>Email me if the scheduler stops running (no run for over 25h)</span>
+                    </label>
+
+                    <div class="sp-form-col">
+                        <label class="sp-label" for="sp_alert_email">Recipient (optional)</label>
+                        <input type="email"
+                               id="sp_alert_email"
+                               name="sp_alert_email"
+                               value="<?php echo esc_attr($alert_email); ?>"
+                               placeholder="<?php echo esc_attr(get_option('admin_email')); ?>"
+                               class="sp-input-number sp-input-wide">
+                    </div>
+                    <p class="sp-help-text">
+                        Leave empty to use the site's admin email. At most one alert every 24 hours.
                     </p>
                 </div>
 
