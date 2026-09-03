@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         form.addEventListener('submit', function() {
-            const btn = this.querySelector('.sp-btn');
+            const btn = this.querySelector('.button-hero');
             if (btn) {
                 const originalText = btn.innerHTML;
                 btn.style.width = btn.offsetWidth + 'px'; // Garde la largeur
