@@ -26,6 +26,11 @@ function sp_handle_admin_actions() {
         update_option('sp_auto_mode', isset($_POST['sp_auto_mode']) ? '1' : '0');
         update_option('sp_force_replan', isset($_POST['sp_force_replan']) ? '1' : '0');
 
+        $excluded_categories = isset($_POST['sp_excluded_categories']) && is_array($_POST['sp_excluded_categories'])
+            ? array_map('intval', $_POST['sp_excluded_categories'])
+            : array();
+        update_option('sp_excluded_categories', $excluded_categories);
+
         $message = array('type' => 'success', 'text' => '✅ Settings saved successfully!');
     }
 

@@ -19,6 +19,7 @@ $options = array(
     'sp_start_hour',
     'sp_end_hour',
     'sp_force_replan',
+    'sp_excluded_categories',
     'sp_version',
     'sp_db_version',
     'sp_last_cron_run',

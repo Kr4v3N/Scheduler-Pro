@@ -112,6 +112,7 @@ function sp_activate_plugin() {
     add_option('sp_end_hour', 20);
     add_option('sp_auto_mode', '1'); // Enabled by default
     add_option('sp_force_replan', '0');
+    add_option('sp_excluded_categories', array());
 
     // Record the installed version
     update_option('sp_version', SP_VERSION);

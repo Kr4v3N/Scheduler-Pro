@@ -56,6 +56,9 @@ if (!function_exists('sp_process_scheduling')) {
             $end_hour      = max(0, min(23, (int) get_option('sp_end_hour', 20)));
             $force_replan  = get_option('sp_force_replan', '0');
 
+            // Categories entirely excluded from auto-scheduling (configured in Settings).
+            $excluded_categories = array_map('intval', (array) get_option('sp_excluded_categories', array()));
+
             if ($start_hour >= $end_hour) {
                 sp_log("⚠️ Invalid configuration: start_hour >= end_hour - auto-correcting", 'WARNING');
                 $start_hour = 7;
@@ -66,6 +69,10 @@ if (!function_exists('sp_process_scheduling')) {
                 ? "{$cadence_count} posts/{$cadence_unit} (~1 every {$interval_days}d)"
                 : "{$posts_per_day} posts/day";
             sp_log("Settings: {$cadence_description} | Range: {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'YES' : 'NO'), 'INFO');
+
+            if (!empty($excluded_categories)) {
+                sp_log("🚫 " . count($excluded_categories) . " category(ies) excluded from auto-scheduling", 'INFO');
+            }
 
             // === STEP 3: DETERMINE THE STARTING POINT ===
             if ($is_cadence_mode) {
@@ -104,6 +111,10 @@ if (!function_exists('sp_process_scheduling')) {
                 'order'          => 'ASC',
                 'fields'         => 'ids',
             );
+
+            if (!empty($excluded_categories)) {
+                $base_args['category__not_in'] = $excluded_categories;
+            }
 
             // Exclude locked posts directly in the query (in both modes): avoids
             // wasting a batch slot on a post that would be ignored anyway

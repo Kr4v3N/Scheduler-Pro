@@ -15,6 +15,7 @@ function sp_render_settings_tab() {
     $end_hour = get_option('sp_end_hour', 20);
     $auto_mode = get_option('sp_auto_mode', '1');
     $force_replan = get_option('sp_force_replan', '0');
+    $excluded_categories = array_map('intval', (array) get_option('sp_excluded_categories', array()));
     $total_future = (int) wp_count_posts()->future;
 
     // Average interval between two posts, in days (unifies all 3 units:
@@ -126,6 +127,30 @@ function sp_render_settings_tab() {
                             </p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Card: Category Exclusion -->
+                <div class="sp-card">
+                    <h2 class="sp-card-title">
+                        <span class="dashicons dashicons-hidden"></span>
+                        Category Exclusion
+                    </h2>
+
+                    <label class="sp-label" for="sp_excluded_categories">Categories never auto-scheduled</label>
+                    <select id="sp_excluded_categories"
+                            name="sp_excluded_categories[]"
+                            class="sp-select-multiple"
+                            multiple>
+                        <?php foreach (get_categories(array('hide_empty' => false)) as $category): ?>
+                            <option value="<?php echo esc_attr($category->term_id); ?>"
+                                <?php echo in_array($category->term_id, $excluded_categories, true) ? 'selected' : ''; ?>>
+                                <?php echo esc_html($category->name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="sp-help-text">
+                        Posts in a selected category are entirely skipped by the scheduler (Ctrl/Cmd-click to select several).
+                    </p>
                 </div>
 
                 <!-- Card: Full Reset Mode -->
