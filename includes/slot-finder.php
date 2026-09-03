@@ -33,6 +33,33 @@ if (!function_exists('sp_count_non_locked_posts_on_date')) {
 }
 
 /**
+ * SKIP WEEKENDS (optional, sp_skip_weekends = '1')
+ *
+ * Pushes a Saturday/Sunday candidate date forward to the following
+ * Monday. No-op when the setting is off, or when $date isn't a weekend
+ * day. Called everywhere a candidate publish date is finalized, in both
+ * scheduling models (day-bucket and week/month cadence).
+ */
+if (!function_exists('sp_skip_weekend_if_needed')) {
+    function sp_skip_weekend_if_needed($date) {
+        if (get_option('sp_skip_weekends', '0') !== '1') {
+            return $date;
+        }
+
+        $day_of_week = (int) date('N', strtotime($date)); // 1 (Mon) .. 7 (Sun)
+
+        if ($day_of_week === 6) { // Saturday
+            return date('Y-m-d', strtotime('+2 days', strtotime($date)));
+        }
+        if ($day_of_week === 7) { // Sunday
+            return date('Y-m-d', strtotime('+1 day', strtotime($date)));
+        }
+
+        return $date;
+    }
+}
+
+/**
  * FIND THE NEXT AVAILABLE SLOT
  */
 if (!function_exists('sp_get_next_available_slot')) {
@@ -47,7 +74,7 @@ if (!function_exists('sp_get_next_available_slot')) {
         ");
 
         if (!$last_date) {
-            $start_date = date('Y-m-d', strtotime('+1 day', current_time('timestamp')));
+            $start_date = sp_skip_weekend_if_needed(date('Y-m-d', strtotime('+1 day', current_time('timestamp'))));
             sp_log("📅 No FUTURE post found → Starting on {$start_date}", 'INFO');
 
             return array(
@@ -63,12 +90,13 @@ if (!function_exists('sp_get_next_available_slot')) {
             $last_date = $tomorrow;
         }
 
+        $last_date = sp_skip_weekend_if_needed($last_date);
         $count = sp_count_non_locked_posts_on_date($last_date);
 
         sp_log("📊 Resume date: {$last_date} ({$count}/{$posts_per_day} non-locked FUTURE posts)", 'INFO');
 
         while ($count >= $posts_per_day) {
-            $last_date = date('Y-m-d', strtotime("+1 day", strtotime($last_date)));
+            $last_date = sp_skip_weekend_if_needed(date('Y-m-d', strtotime("+1 day", strtotime($last_date))));
             $count = sp_count_non_locked_posts_on_date($last_date);
 
             sp_log("📅 Day full → Moving to {$last_date} ({$count}/{$posts_per_day} posts)", 'INFO');
@@ -86,7 +114,7 @@ if (!function_exists('sp_get_next_available_slot')) {
  */
 if (!function_exists('sp_find_next_available_day')) {
     function sp_find_next_available_day($current_date, $posts_per_day) {
-        $next_date = date('Y-m-d', strtotime("+1 day", strtotime($current_date)));
+        $next_date = sp_skip_weekend_if_needed(date('Y-m-d', strtotime("+1 day", strtotime($current_date))));
         $count = sp_count_non_locked_posts_on_date($next_date);
 
         $max_iterations = 365;
@@ -94,7 +122,7 @@ if (!function_exists('sp_find_next_available_day')) {
 
         while ($count >= $posts_per_day && $iterations < $max_iterations) {
             sp_log("⏭️ Day {$next_date} already full ({$count}/{$posts_per_day}) → Moving to the next one", 'INFO');
-            $next_date = date('Y-m-d', strtotime("+1 day", strtotime($next_date)));
+            $next_date = sp_skip_weekend_if_needed(date('Y-m-d', strtotime("+1 day", strtotime($next_date))));
             $count = sp_count_non_locked_posts_on_date($next_date);
             $iterations++;
         }
@@ -159,7 +187,9 @@ if (!function_exists('sp_advance_cadence_date')) {
         $jitter_factor = mt_rand(-20, 20) / 100; // ±20%
         $jittered_days = max(1, (int) round($interval_days * (1 + $jitter_factor)));
 
-        return date('Y-m-d', strtotime("+{$jittered_days} days", strtotime($date)));
+        $next_date = date('Y-m-d', strtotime("+{$jittered_days} days", strtotime($date)));
+
+        return sp_skip_weekend_if_needed($next_date);
     }
 }
 
@@ -169,6 +199,11 @@ if (!function_exists('sp_advance_cadence_date')) {
  * exists or it's already in the past. sp_advance_cadence_date() is then
  * applied on top of this anchor for the first post, guaranteeing the
  * result never lands earlier than tomorrow.
+ *
+ * IMPORTANT: this anchor is never used directly as a publish date (only
+ * as a base for sp_advance_cadence_date()), so it deliberately does NOT
+ * apply sp_skip_weekend_if_needed() itself - that would shift the
+ * interval math even though the anchor is never actually published on.
  */
 if (!function_exists('sp_get_cadence_anchor_date')) {
     function sp_get_cadence_anchor_date() {

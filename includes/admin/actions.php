@@ -24,6 +24,7 @@ function sp_handle_admin_actions() {
         update_option('sp_cadence_count', max(1, min(500, intval($_POST['sp_cadence_count']))));
         update_option('sp_start_hour', max(0, min(23, intval($_POST['sp_start_hour']))));
         update_option('sp_end_hour', max(0, min(23, intval($_POST['sp_end_hour']))));
+        update_option('sp_skip_weekends', isset($_POST['sp_skip_weekends']) ? '1' : '0');
         update_option('sp_auto_mode', isset($_POST['sp_auto_mode']) ? '1' : '0');
         update_option('sp_force_replan', isset($_POST['sp_force_replan']) ? '1' : '0');
 

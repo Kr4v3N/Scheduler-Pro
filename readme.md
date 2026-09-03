@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,7 @@ Most scheduling plugins use simple algorithms that create detectable patterns. *
 **🔧 Smart Configuration**
 * **Flexible cadence**: schedule by day, week, or month (e.g. "2/week", "6/month"), with automatic day distribution
 * **Category exclusion**: keep entire categories out of auto-scheduling
+* **Skip weekends**: optionally never publish on Saturday or Sunday
 * **Preview before running**: see the exact resulting dates before committing anything
 * **Adhesive Mode**: adds new posts after the existing ones without touching them
 * **Full Reset Mode**: reorganizes the ENTIRE backlog starting tomorrow
@@ -200,6 +201,11 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.2 - 2026-09-03 =
+
+**✨ New Feature**
+* **Skip weekends**: new checkbox in Settings (`sp_skip_weekends`, off by default). When enabled, the scheduler never picks a Saturday or Sunday as a publish date - it pushes the candidate date forward to the following Monday. Works identically across the day, week, and month cadences.
 
 = 2.6.1 - 2026-09-03 =
 

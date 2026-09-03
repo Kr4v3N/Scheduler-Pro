@@ -13,6 +13,7 @@ function sp_render_settings_tab($preview = null) {
     $cadence_count = (int) get_option('sp_cadence_count', get_option('sp_posts_per_day', 3));
     $start_hour = get_option('sp_start_hour', 7);
     $end_hour = get_option('sp_end_hour', 20);
+    $skip_weekends = get_option('sp_skip_weekends', '0');
     $auto_mode = get_option('sp_auto_mode', '1');
     $force_replan = get_option('sp_force_replan', '0');
     $excluded_categories = array_map('intval', (array) get_option('sp_excluded_categories', array()));
@@ -120,6 +121,14 @@ function sp_render_settings_tab($preview = null) {
                             <p class="sp-help-text">
                                 Recommended: 7am-8pm for natural-looking activity
                             </p>
+
+                            <label class="sp-checkbox-label">
+                                <input type="checkbox"
+                                       name="sp_skip_weekends"
+                                       value="1"
+                                       <?php checked($skip_weekends, '1'); ?>>
+                                <span>Skip weekends (Saturday &amp; Sunday)</span>
+                            </label>
                         </div>
 
                         <div class="sp-form-col">

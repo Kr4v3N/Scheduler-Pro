@@ -18,6 +18,7 @@ $options = array(
     'sp_auto_mode',
     'sp_start_hour',
     'sp_end_hour',
+    'sp_skip_weekends',
     'sp_force_replan',
     'sp_excluded_categories',
     'sp_email_alerts',

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Scheduler Pro
  * Description: Automatic, human-like post scheduling with an advanced monitoring system.
- * Version: 2.6.1
+ * Version: 2.6.2
  * Author: Kr4v3n
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -23,7 +23,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 }
 
 // Path constants
-define('SP_VERSION', '2.6.1');
+define('SP_VERSION', '2.6.2');
 define('SP_PATH', plugin_dir_path(__FILE__));
 define('SP_URL', plugin_dir_url(__FILE__));
 define('SP_BASENAME', plugin_basename(__FILE__));
@@ -110,6 +110,7 @@ function sp_activate_plugin() {
     add_option('sp_cadence_count', 3);
     add_option('sp_start_hour', 7);
     add_option('sp_end_hour', 20);
+    add_option('sp_skip_weekends', '0'); // Disabled by default (unchanged behavior)
     add_option('sp_auto_mode', '1'); // Enabled by default
     add_option('sp_force_replan', '0');
     add_option('sp_excluded_categories', array());

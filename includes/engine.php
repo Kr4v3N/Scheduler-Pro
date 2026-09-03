@@ -76,7 +76,8 @@ if (!function_exists('sp_process_scheduling')) {
             $cadence_description = $is_cadence_mode
                 ? "{$cadence_count} posts/{$cadence_unit} (~1 every {$interval_days}d)"
                 : "{$posts_per_day} posts/day";
-            sp_log("Settings: {$cadence_description} | Range: {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'YES' : 'NO'), 'INFO');
+            $skip_weekends_label = get_option('sp_skip_weekends', '0') === '1' ? 'YES' : 'NO';
+            sp_log("Settings: {$cadence_description} | Range: {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'YES' : 'NO') . " | Skip weekends: {$skip_weekends_label}", 'INFO');
 
             if (!empty($excluded_categories)) {
                 sp_log("🚫 " . count($excluded_categories) . " category(ies) excluded from auto-scheduling", 'INFO');
@@ -97,7 +98,7 @@ if (!function_exists('sp_process_scheduling')) {
                     sp_log("📌 'Adhesive' mode enabled: Resuming from {$current_date} at a {$cadence_count}/{$cadence_unit} cadence", 'INFO');
                 }
             } elseif ($force_replan === '1') {
-                $tomorrow = date('Y-m-d', strtotime('+1 day', current_time('timestamp')));
+                $tomorrow = sp_skip_weekend_if_needed(date('Y-m-d', strtotime('+1 day', current_time('timestamp'))));
                 $current_date = $tomorrow;
                 $count_in_day = 0;
 
