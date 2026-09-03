@@ -196,7 +196,7 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 2. **Monitoring Tab** - Real-time dashboard with statistics and charts
 3. **Logs Tab** - Activity log with filtering and a dark theme
 4. **Locking Meta Box** - Manually lock a post's date
-5. **Visual Distribution** - Chart of publications over 30 days
+5. **Visual Distribution** - 3-month weekly chart plus a 2-month calendar view of publications
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
