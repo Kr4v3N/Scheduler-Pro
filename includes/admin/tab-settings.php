@@ -22,8 +22,15 @@ function sp_render_settings_tab($preview = null) {
 
     // Average interval between two posts, in days (unifies all 3 units:
     // "day" with count=3 gives 1/3 day, same as the pre-cadence formula).
-    $cadence_periods = array('day' => 1, 'week' => 7, 'month' => 30);
-    $interval_days = max(1, $cadence_periods[$cadence_unit]) / max(1, $cadence_count);
+    // For week/month, reuse the engine's own sp_get_cadence_interval_days()
+    // (includes/slot-finder.php) rather than recomputing it here: it clamps
+    // the result to at least 1 day (week/month never place more than 1
+    // post/day), and duplicating that formula without the clamp previously
+    // made this simulator show a shorter duration than the engine actually
+    // produces once sp_cadence_count exceeds the period (e.g. 10/week).
+    $interval_days = ($cadence_unit === 'day')
+        ? 1 / max(1, $cadence_count)
+        : sp_get_cadence_interval_days($cadence_unit, $cadence_count);
 
     ?>
     <div class="sp-settings-grid">
@@ -328,8 +335,13 @@ function sp_render_settings_tab($preview = null) {
         const $summary = $('#sp-summary-text');
 
         function intervalDays() {
-            const period = periods[$unit.val()] || 1;
-            return period / (parseInt($count.val()) || 1);
+            const unit = $unit.val();
+            const period = periods[unit] || 1;
+            const raw = period / (parseInt($count.val()) || 1);
+            // Week/month never place more than 1 post/day (mirrors
+            // sp_get_cadence_interval_days() in includes/slot-finder.php) -
+            // "day" alone can go below 1 (several posts per day).
+            return unit === 'day' ? raw : Math.max(1, raw);
         }
 
         function updateSim() {
