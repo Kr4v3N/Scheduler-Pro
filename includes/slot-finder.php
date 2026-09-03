@@ -1,6 +1,6 @@
 <?php
 /**
- * SLOT FINDER - Scheduler Pro v2.5
+ * SLOT FINDER - Scheduler Pro v2.6
  *
  * Finds the next available slot (day + position) for the Adhesive mode
  * of sp_process_scheduling(). Only counts posts with post_status =

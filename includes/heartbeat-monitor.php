@@ -1,6 +1,6 @@
 <?php
 /**
- * HEARTBEAT MONITOR - Scheduler Pro v2.5
+ * HEARTBEAT MONITOR - Scheduler Pro v2.6
  *
  * Scheduler health monitoring system
  *

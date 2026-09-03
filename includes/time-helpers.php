@@ -1,6 +1,6 @@
 <?php
 /**
- * TIME HELPERS - Scheduler Pro v2.5
+ * TIME HELPERS - Scheduler Pro v2.6
  *
  * Converts a time expression given in the site's timezone (as set in
  * WordPress > Settings > General) into a real UTC timestamp, as required

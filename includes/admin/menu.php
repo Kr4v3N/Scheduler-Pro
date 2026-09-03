@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN: MENU & MAIN PAGE - Scheduler Pro v2.5
+ * ADMIN: MENU & MAIN PAGE - Scheduler Pro v2.6
  *
  * Menu registration, page shell (header, tabs) and routing to the right
  * tab. Each tab's rendering lives in its own file (tab-*.php in this

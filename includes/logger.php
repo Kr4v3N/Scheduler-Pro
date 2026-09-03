@@ -1,6 +1,6 @@
 <?php
 /**
- * LOGGER - Scheduler Pro v2.5
+ * LOGGER - Scheduler Pro v2.6
  *
  * Plugin activity log, with automatic rotation. The file is stored in a
  * dedicated directory under uploads/ (not directly in wp-content/),

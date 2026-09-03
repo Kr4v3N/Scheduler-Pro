@@ -1,6 +1,6 @@
 <?php
 /**
- * LOCK MANAGER - Scheduler Pro v2.5
+ * LOCK MANAGER - Scheduler Pro v2.6
  *
  * Locking system to prevent concurrent executions.
  *

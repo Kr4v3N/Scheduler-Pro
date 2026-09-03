@@ -1,6 +1,6 @@
 <?php
 /**
- * ENGINE - Scheduler Pro v2.5
+ * ENGINE - Scheduler Pro v2.6
  *
  * Scheduling engine. Depends on:
  * - includes/memory-guard.php (memory check)

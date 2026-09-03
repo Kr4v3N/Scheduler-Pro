@@ -1,6 +1,6 @@
 <?php
 /**
- * HUMAN TIME GENERATOR - Scheduler Pro v2.5
+ * HUMAN TIME GENERATOR - Scheduler Pro v2.6
  *
  * Ultra-human date/time generator featuring:
  * - Non-uniform distribution (activity peaks at 9am, 2pm, 5pm)

@@ -1,6 +1,6 @@
 <?php
 /**
- * DATABASE MANAGER - Scheduler Pro v2.5
+ * DATABASE MANAGER - Scheduler Pro v2.6
  *
  * Manages the persistent queue table for scheduled tasks
  *

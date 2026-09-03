@@ -1,6 +1,6 @@
 <?php
 /**
- * MEMORY GUARD - Scheduler Pro v2.5
+ * MEMORY GUARD - Scheduler Pro v2.6
  *
  * Memory management utilities, shared between the scheduling engine
  * (engine.php) and the diagnostics (heartbeat-monitor.php), which used

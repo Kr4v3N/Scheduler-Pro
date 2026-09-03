@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN: ABOUT TAB - Scheduler Pro v2.5
+ * ADMIN: ABOUT TAB - Scheduler Pro v2.6
  */
 
 if (!defined('ABSPATH')) exit;

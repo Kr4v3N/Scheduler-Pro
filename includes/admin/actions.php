@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN: ACTION HANDLING - Scheduler Pro v2.5
+ * ADMIN: ACTION HANDLING - Scheduler Pro v2.6
  *
  * Processes form submissions (saving settings, manual run) and the
  * manual cron test result (includes/heartbeat-monitor.php redirects to
