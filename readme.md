@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.0
+Stable tag: 2.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -200,6 +200,11 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.1 - 2026-09-03 =
+
+**🔧 Fix**
+* Strategy Simulator: the estimated duration shown for a week/month cadence was too short once the count exceeded the period (e.g. more than 7/week or 30/month), because the simulator's interval calculation didn't cap at 1 post/day like the actual scheduling engine does. The simulator now reuses the engine's own calculation.
 
 = 2.6.0 - 2026-09-03 =
 
