@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Scheduler Pro
  * Description: Automatic, human-like post scheduling with an advanced monitoring system.
- * Version: 2.5
+ * Version: 2.6
  * Author: Kr4v3n
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -23,7 +23,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 }
 
 // Path constants
-define('SP_VERSION', '2.5.0');
+define('SP_VERSION', '2.6.0');
 define('SP_PATH', plugin_dir_path(__FILE__));
 define('SP_URL', plugin_dir_url(__FILE__));
 define('SP_BASENAME', plugin_basename(__FILE__));
@@ -155,10 +155,11 @@ add_action('admin_notices', function() {
             <h3>🎉 Scheduler Pro v<?php echo SP_VERSION; ?> activated successfully!</h3>
             <p>
                 <strong>What's new in this version:</strong>
-                ✅ Atomic anti-duplicate locking
-                ✅ Reliable scheduling across all timezones
-                ✅ Activity log protected against direct access
-                ✅ Modular architecture
+                ✅ Flexible cadence (day/week/month)
+                ✅ Category exclusion
+                ✅ Preview before running
+                ✅ Email alerts
+                ✅ Calendar view
             </p>
             <p>
                 <a href="<?php echo admin_url('admin.php?page=scheduler-pro'); ?>" class="button button-primary">

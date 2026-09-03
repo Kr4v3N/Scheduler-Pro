@@ -19,13 +19,13 @@ function sp_render_about_tab() {
                 Designed to optimize your SEO publishing flow while keeping a natural appearance.
             </p>
 
-            <h3>✨ What's New in v2.5</h3>
+            <h3>✨ What's New in v2.6</h3>
             <ul class="sp-feature-list">
-                <li>✅ <strong>Atomic locking</strong>: eliminates the race window on the execution lock</li>
-                <li>✅ <strong>Reliable scheduling</strong>: fixed a bug that could skip posts in Adhesive mode</li>
-                <li>✅ <strong>Timezone respected</strong>: daily scheduling now honors WordPress's configured timezone</li>
-                <li>✅ <strong>Protected log</strong>: the log file is no longer reachable via direct HTTP access</li>
-                <li>✅ <strong>Modular architecture</strong>: code split by responsibility for easier maintenance</li>
+                <li>✅ <strong>Flexible cadence</strong>: schedule by day, week, or month (e.g. "2/week", "6/month"), not just posts/day</li>
+                <li>✅ <strong>Category exclusion</strong>: keep entire categories out of auto-scheduling</li>
+                <li>✅ <strong>Preview before running</strong>: see the exact resulting dates before committing anything</li>
+                <li>✅ <strong>Email alerts</strong>: get notified if the scheduler stops running</li>
+                <li>✅ <strong>Calendar view</strong>: 2-month day-by-day view of the upcoming schedule</li>
             </ul>
 
             <h3>🧱 Core Features</h3>
@@ -41,8 +41,8 @@ function sp_render_about_tab() {
             <h3>🔧 Recommended Configuration</h3>
             <table class="sp-config-table">
                 <tr>
-                    <td><strong>Posts/day:</strong></td>
-                    <td>3-5 (natural and SEO-friendly)</td>
+                    <td><strong>Cadence:</strong></td>
+                    <td>3-5/day (natural and SEO-friendly), or a week/month cadence for a lighter rhythm</td>
                 </tr>
                 <tr>
                     <td><strong>Time range:</strong></td>

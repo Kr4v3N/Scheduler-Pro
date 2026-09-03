@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.5.0
+Stable tag: 2.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,11 +40,15 @@ Most scheduling plugins use simple algorithms that create detectable patterns. *
 
 **📊 Advanced Monitoring**
 * Real-time dashboard with full statistics
-* 30-day distribution chart
+* 3-month distribution chart (by week) plus a 2-month day-by-day calendar view
 * Automatic issue detection (inactive cron, stuck tasks)
+* Email alert if the scheduler stops running (throttled to 1/24h)
 * Activity log with automatic rotation
 
 **🔧 Smart Configuration**
+* **Flexible cadence**: schedule by day, week, or month (e.g. "2/week", "6/month"), with automatic day distribution
+* **Category exclusion**: keep entire categories out of auto-scheduling
+* **Preview before running**: see the exact resulting dates before committing anything
 * **Adhesive Mode**: adds new posts after the existing ones without touching them
 * **Full Reset Mode**: reorganizes the ENTIRE backlog starting tomorrow
 * **Manual locking**: lock the date of specific posts
@@ -121,7 +125,7 @@ Automate the publication of thousands of posts with professional reliability.
 
 1. Go to **Scheduler Pro** in the admin menu
 2. Configure your settings:
-   * **Posts/day**: 3-5 recommended for natural-looking behavior
+   * **Cadence**: 3-5/day recommended for natural-looking behavior, or a week/month cadence (e.g. "2/week") for a lighter rhythm
    * **Time range**: 7am-8pm to mimic human activity
    * **Auto mode**: enabled for a daily run at 00:30
 3. Save your settings
@@ -196,6 +200,18 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.0 - 2026-09-03 =
+
+**✨ New Features**
+* **Flexible cadence**: replaced the flat "posts/day" setting with a unified cadence (count + day/week/month unit). "Day" keeps the exact original behavior; "week"/"month" use a new rolling-average-interval model (at most 1 post/day, with ±20% jitter to avoid a detectable rhythm). Existing installs are migrated automatically with unchanged behavior.
+* **Category exclusion**: posts in selected categories are entirely skipped by the scheduler, in both Adhesive and Full Reset modes. Replaces the old, never-functional `sp_excluded_ids` option.
+* **Preview before running**: a new "Preview" button next to "Run Scheduling Now" simulates a full run (identical selection and date logic) and shows the resulting dates in a table, without writing anything.
+* **Email alerts**: an email is sent to the site admin (or a custom address) as soon as the scheduler status turns critical (no run in over 25h), throttled to at most one email every 24h. Checked on every admin page load rather than on the plugin's own cron, so it still fires when WP-Cron itself is what's broken.
+* **Calendar view**: a new 2-month, pure-CSS calendar grid in the Monitoring tab, showing the post count per day with titles on hover, alongside the existing chart.
+
+**⚙️ Improvements**
+* The distribution chart now spans 3 months (grouped by week) instead of 30 daily bars.
 
 = 2.5.0 - 2026-09-03 =
 
