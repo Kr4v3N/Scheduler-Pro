@@ -121,6 +121,9 @@ function sp_render_monitoring_tab() {
 
         <!-- Post Distribution -->
         <?php sp_render_distribution_chart(); ?>
+
+        <!-- Calendar View -->
+        <?php sp_render_calendar_view(); ?>
     </div>
     <?php
 }
@@ -178,6 +181,113 @@ function sp_render_distribution_chart() {
                     <div class="sp-chart-bar-value"><?php echo $week['count']; ?></div>
                 </div>
             <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+}
+
+/**
+ * Display a 2-month calendar grid of upcoming FUTURE posts (current month
+ * + next month), complementing the weekly bar chart above with day-level
+ * detail: post count per day, with titles shown on hover. Pure CSS, no
+ * JS library.
+ */
+function sp_render_calendar_view() {
+    global $wpdb;
+
+    $today = new DateTime(current_time('Y-m-d'));
+    $range_start = new DateTime($today->format('Y-m-01'));
+    $range_end = (clone $range_start)->modify('+2 months')->modify('-1 day');
+
+    $rows = $wpdb->get_results($wpdb->prepare("
+        SELECT post_title, post_date
+        FROM {$wpdb->posts}
+        WHERE post_status = 'future'
+        AND post_type = 'post'
+        AND DATE(post_date) >= %s
+        AND DATE(post_date) <= %s
+        ORDER BY post_date ASC
+    ", $range_start->format('Y-m-d'), $range_end->format('Y-m-d')), ARRAY_A);
+
+    $titles_by_date = array();
+    foreach ($rows as $row) {
+        $date_key = substr($row['post_date'], 0, 10);
+        $titles_by_date[$date_key][] = $row['post_title'];
+    }
+
+    ?>
+    <div class="sp-card">
+        <h2 class="sp-card-title">
+            <span class="dashicons dashicons-calendar"></span>
+            Calendar View
+        </h2>
+
+        <div class="sp-calendar">
+            <?php
+            $month_cursor = clone $range_start;
+            for ($m = 0; $m < 2; $m++) {
+                sp_render_calendar_month($month_cursor, $titles_by_date, $today);
+                $month_cursor->modify('+1 month');
+            }
+            ?>
+        </div>
+    </div>
+    <?php
+}
+
+/**
+ * Render a single month grid for sp_render_calendar_view().
+ *
+ * @param DateTime $month_start First day of the month to render
+ * @param array    $titles_by_date Map of 'Y-m-d' => array of post titles
+ * @param DateTime $today
+ */
+function sp_render_calendar_month($month_start, $titles_by_date, $today) {
+    $first_weekday = (int) $month_start->format('N'); // 1 (Mon) .. 7 (Sun)
+    $days_in_month = (int) $month_start->format('t');
+    $today_key = $today->format('Y-m-d');
+
+    ?>
+    <div class="sp-calendar-month">
+        <h3 class="sp-calendar-month-title"><?php echo esc_html($month_start->format('F Y')); ?></h3>
+        <div class="sp-calendar-grid">
+            <?php foreach (array('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun') as $weekday_label): ?>
+                <div class="sp-calendar-weekday"><?php echo $weekday_label; ?></div>
+            <?php endforeach; ?>
+
+            <?php for ($i = 1; $i < $first_weekday; $i++): ?>
+                <div class="sp-calendar-day sp-calendar-day-empty"></div>
+            <?php endfor; ?>
+
+            <?php for ($day = 1; $day <= $days_in_month; $day++): ?>
+                <?php
+                $date_key = $month_start->format('Y-m-') . str_pad($day, 2, '0', STR_PAD_LEFT);
+                $titles = $titles_by_date[$date_key] ?? array();
+                $count = count($titles);
+
+                $classes = array('sp-calendar-day');
+                if ($count > 0) $classes[] = 'sp-calendar-day-has-posts';
+                if ($date_key === $today_key) $classes[] = 'sp-calendar-day-today';
+                if ($date_key < $today_key) $classes[] = 'sp-calendar-day-past';
+                ?>
+                <div class="<?php echo esc_attr(implode(' ', $classes)); ?>">
+                    <span class="sp-calendar-daynum"><?php echo $day; ?></span>
+                    <?php if ($count > 0): ?>
+                        <span class="sp-calendar-count"><?php echo $count; ?></span>
+                        <div class="sp-calendar-tooltip">
+                            <strong><?php echo esc_html(date_i18n('D d M', strtotime($date_key))); ?></strong>
+                            <ul>
+                                <?php foreach (array_slice($titles, 0, 8) as $title): ?>
+                                    <li><?php echo esc_html($title !== '' ? $title : '(no title)'); ?></li>
+                                <?php endforeach; ?>
+                                <?php if ($count > 8): ?>
+                                    <li><?php echo ($count - 8); ?> more…</li>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endfor; ?>
         </div>
     </div>
     <?php

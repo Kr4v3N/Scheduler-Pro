@@ -725,6 +725,129 @@
     opacity: 1;
 }
 
+/* === CALENDAR VIEW === */
+.sp-calendar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .sp-calendar {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sp-calendar-month-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--sp-gray-700);
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+.sp-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.sp-calendar-weekday {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--sp-gray-400);
+    text-align: center;
+    padding-bottom: 6px;
+}
+
+.sp-calendar-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--sp-radius-sm);
+    background: var(--sp-gray-50);
+    font-size: 12px;
+    color: var(--sp-gray-500);
+}
+
+.sp-calendar-day-empty {
+    background: transparent;
+}
+
+.sp-calendar-day-past {
+    opacity: 0.45;
+}
+
+.sp-calendar-day-today {
+    box-shadow: 0 0 0 2px var(--sp-primary);
+}
+
+.sp-calendar-day-has-posts {
+    background: var(--sp-primary-light);
+    color: var(--sp-primary-dark);
+}
+
+.sp-calendar-daynum {
+    font-weight: 600;
+}
+
+.sp-calendar-count {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--sp-primary);
+    color: #fff;
+    border-radius: 999px;
+    padding: 1px 6px;
+    margin-top: 2px;
+}
+
+.sp-calendar-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    width: 220px;
+    background: var(--sp-gray-900);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: var(--sp-radius-sm);
+    font-size: 12px;
+    text-align: left;
+    z-index: 20;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.sp-calendar-tooltip strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.sp-calendar-tooltip ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+.sp-calendar-tooltip li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sp-calendar-day-has-posts:hover {
+    cursor: default;
+}
+
+.sp-calendar-day-has-posts:hover .sp-calendar-tooltip {
+    display: block;
+}
+
 /* === LOGS === */
 .sp-logs-header {
     display: flex;
