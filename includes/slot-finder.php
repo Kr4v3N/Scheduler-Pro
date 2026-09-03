@@ -109,3 +109,80 @@ if (!function_exists('sp_find_next_available_day')) {
         );
     }
 }
+
+/**
+ * CADENCE HELPERS (Week / Month scheduling)
+ *
+ * Used when sp_cadence_unit is 'week' or 'month': at most one post per
+ * day, placed at a rolling average interval derived from the period and
+ * the desired count (e.g. "2/week" => roughly one post every 3.5 days).
+ * The 'day' unit keeps the original one-or-more-per-day bucket model
+ * above completely unchanged.
+ */
+
+/**
+ * Number of days in a cadence period.
+ */
+if (!function_exists('sp_get_cadence_period_days')) {
+    function sp_get_cadence_period_days($unit) {
+        switch ($unit) {
+            case 'week':
+                return 7;
+            case 'month':
+                return 30;
+            default:
+                return 1;
+        }
+    }
+}
+
+/**
+ * Average interval (in days) between two posts for a given cadence.
+ * Always at least 1: week/month cadence never places more than one post
+ * per day (a "day" unit cadence should be used for that instead).
+ */
+if (!function_exists('sp_get_cadence_interval_days')) {
+    function sp_get_cadence_interval_days($unit, $count) {
+        $count = max(1, (int) $count);
+        $period = sp_get_cadence_period_days($unit);
+        return max(1, $period / $count);
+    }
+}
+
+/**
+ * Step from $date by roughly $interval_days, with a ±20% random jitter
+ * so the resulting dates don't fall on a rigid, detectable rhythm.
+ * Never advances by less than 1 day.
+ */
+if (!function_exists('sp_advance_cadence_date')) {
+    function sp_advance_cadence_date($date, $interval_days) {
+        $jitter_factor = mt_rand(-20, 20) / 100; // ±20%
+        $jittered_days = max(1, (int) round($interval_days * (1 + $jitter_factor)));
+
+        return date('Y-m-d', strtotime("+{$jittered_days} days", strtotime($date)));
+    }
+}
+
+/**
+ * Starting anchor date for cadence-based scheduling in Adhesive mode:
+ * the date of the last currently-scheduled FUTURE post, or today if none
+ * exists or it's already in the past. sp_advance_cadence_date() is then
+ * applied on top of this anchor for the first post, guaranteeing the
+ * result never lands earlier than tomorrow.
+ */
+if (!function_exists('sp_get_cadence_anchor_date')) {
+    function sp_get_cadence_anchor_date() {
+        global $wpdb;
+
+        $last_date = $wpdb->get_var("
+            SELECT MAX(DATE(post_date))
+            FROM $wpdb->posts
+            WHERE post_status = 'future'
+            AND post_type = 'post'
+        ");
+
+        $today = date('Y-m-d', current_time('timestamp'));
+
+        return ($last_date && $last_date > $today) ? $last_date : $today;
+    }
+}

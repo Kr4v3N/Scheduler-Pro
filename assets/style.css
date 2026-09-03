@@ -334,6 +334,31 @@
     gap: 10px;
 }
 
+.sp-cadence-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sp-cadence-input .sp-input-number {
+    max-width: 90px;
+}
+
+.sp-input-select {
+    padding: 10px 12px;
+    border: 1.5px solid var(--sp-gray-300);
+    border-radius: var(--sp-radius-sm);
+    font-size: 15px;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sp-input-select:focus {
+    border-color: var(--sp-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--sp-primary-light);
+}
+
 .sp-checkbox-label {
     display: flex;
     align-items: center;

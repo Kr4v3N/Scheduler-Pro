@@ -6,12 +6,21 @@
 if (!defined('ABSPATH')) exit;
 
 function sp_render_settings_tab() {
-    $posts_per_day = get_option('sp_posts_per_day', 3);
+    $cadence_unit = get_option('sp_cadence_unit', 'day');
+    if (!in_array($cadence_unit, array('day', 'week', 'month'), true)) {
+        $cadence_unit = 'day';
+    }
+    $cadence_count = (int) get_option('sp_cadence_count', get_option('sp_posts_per_day', 3));
     $start_hour = get_option('sp_start_hour', 7);
     $end_hour = get_option('sp_end_hour', 20);
     $auto_mode = get_option('sp_auto_mode', '1');
     $force_replan = get_option('sp_force_replan', '0');
     $total_future = (int) wp_count_posts()->future;
+
+    // Average interval between two posts, in days (unifies all 3 units:
+    // "day" with count=3 gives 1/3 day, same as the pre-cadence formula).
+    $cadence_periods = array('day' => 1, 'week' => 7, 'month' => 30);
+    $interval_days = max(1, $cadence_periods[$cadence_unit]) / max(1, $cadence_count);
 
     ?>
     <div class="sp-settings-grid">
@@ -33,14 +42,25 @@ function sp_render_settings_tab() {
 
                     <div class="sp-simulator">
                         <div class="sp-sim-input">
-                            <label>Posts / day</label>
-                            <input type="number"
-                                   id="sp_posts_per_day"
-                                   name="sp_posts_per_day"
-                                   value="<?php echo $posts_per_day; ?>"
-                                   min="1"
-                                   max="50"
-                                   class="sp-input-number">
+                            <label>Cadence</label>
+                            <div class="sp-cadence-input">
+                                <input type="number"
+                                       id="sp_cadence_count"
+                                       name="sp_cadence_count"
+                                       value="<?php echo esc_attr($cadence_count); ?>"
+                                       min="1"
+                                       max="500"
+                                       class="sp-input-number">
+                                <span>/</span>
+                                <select id="sp_cadence_unit" name="sp_cadence_unit" class="sp-input-select">
+                                    <option value="day" <?php selected($cadence_unit, 'day'); ?>>day</option>
+                                    <option value="week" <?php selected($cadence_unit, 'week'); ?>>week</option>
+                                    <option value="month" <?php selected($cadence_unit, 'month'); ?>>month</option>
+                                </select>
+                            </div>
+                            <p class="sp-help-text">
+                                Days/weeks are auto-distributed to keep publishing rhythm unpredictable.
+                            </p>
                         </div>
 
                         <div class="sp-sim-arrow">
@@ -51,7 +71,7 @@ function sp_render_settings_tab() {
                             <label>Duration (Days)</label>
                             <input type="number"
                                    id="sp_duration_input"
-                                   value="<?php echo ceil($total_future / max(1, $posts_per_day)); ?>"
+                                   value="<?php echo ceil($total_future * $interval_days); ?>"
                                    min="1"
                                    class="sp-input-number">
                         </div>
@@ -169,13 +189,13 @@ function sp_render_settings_tab() {
                     <span class="sp-stat-value"><?php echo $total_future; ?></span>
                 </div>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Posts/day</span>
-                    <span class="sp-stat-value"><?php echo $posts_per_day; ?></span>
+                    <span class="sp-stat-label">Cadence</span>
+                    <span class="sp-stat-value"><?php echo esc_html($cadence_count); ?>/<?php echo esc_html($cadence_unit); ?></span>
                 </div>
                 <div class="sp-stat-item">
                     <span class="sp-stat-label">Estimated duration</span>
                     <span class="sp-stat-value">
-                        <?php echo ceil($total_future / max(1, $posts_per_day)); ?> days
+                        <?php echo ceil($total_future * $interval_days); ?> days
                     </span>
                 </div>
             </div>
@@ -201,9 +221,16 @@ function sp_render_settings_tab() {
     <script>
     jQuery(document).ready(function($) {
         const total = <?php echo $total_future; ?>;
-        const $perDay = $('#sp_posts_per_day');
+        const periods = { day: 1, week: 7, month: 30 };
+        const $count = $('#sp_cadence_count');
+        const $unit = $('#sp_cadence_unit');
         const $duration = $('#sp_duration_input');
         const $summary = $('#sp-summary-text');
+
+        function intervalDays() {
+            const period = periods[$unit.val()] || 1;
+            return period / (parseInt($count.val()) || 1);
+        }
 
         function updateSim() {
             const days = parseInt($duration.val()) || 1;
@@ -211,18 +238,25 @@ function sp_render_settings_tab() {
             date.setDate(date.getDate() + days);
 
             $summary.html(`
-                <strong>Result:</strong> ${$perDay.val()} posts/day until
+                <strong>Result:</strong> ${$count.val()}/${$unit.val()} until
                 <strong>${date.toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'})}</strong>
             `);
         }
 
-        $perDay.on('input', function() {
-            $duration.val(Math.ceil(total / (parseInt($perDay.val()) || 1)));
+        $count.on('input', function() {
+            $duration.val(Math.max(1, Math.ceil(total * intervalDays())));
+            updateSim();
+        });
+
+        $unit.on('change', function() {
+            $duration.val(Math.max(1, Math.ceil(total * intervalDays())));
             updateSim();
         });
 
         $duration.on('input', function() {
-            $perDay.val(Math.ceil(total / (parseInt($duration.val()) || 1)));
+            const period = periods[$unit.val()] || 1;
+            const days = parseInt($duration.val()) || 1;
+            $count.val(Math.max(1, Math.round((period * total) / days)));
             updateSim();
         });
 

@@ -39,7 +39,19 @@ if (!function_exists('sp_process_scheduling')) {
             sp_log("=== STARTING SCHEDULING (FUTURE posts only) ===", 'INFO');
 
             // === STEP 2: RETRIEVE SETTINGS ===
-            $posts_per_day = max(1, (int) get_option('sp_posts_per_day', 3));
+            // Cadence: 'day' keeps the original one-or-more-per-day bucket
+            // model (sp_cadence_count = posts/day, same as the old
+            // sp_posts_per_day). 'week'/'month' switch to the interval-based
+            // model in slot-finder.php (at most 1 post/day).
+            $cadence_unit = get_option('sp_cadence_unit', 'day');
+            if (!in_array($cadence_unit, array('day', 'week', 'month'), true)) {
+                $cadence_unit = 'day';
+            }
+            $cadence_count = max(1, (int) get_option('sp_cadence_count', get_option('sp_posts_per_day', 3)));
+            $is_cadence_mode = ($cadence_unit !== 'day');
+            $interval_days = $is_cadence_mode ? sp_get_cadence_interval_days($cadence_unit, $cadence_count) : 1;
+            $posts_per_day = $is_cadence_mode ? 1 : $cadence_count;
+
             $start_hour    = max(0, min(23, (int) get_option('sp_start_hour', 7)));
             $end_hour      = max(0, min(23, (int) get_option('sp_end_hour', 20)));
             $force_replan  = get_option('sp_force_replan', '0');
@@ -50,10 +62,26 @@ if (!function_exists('sp_process_scheduling')) {
                 $end_hour = 20;
             }
 
-            sp_log("Settings: {$posts_per_day} posts/day | Range: {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'YES' : 'NO'), 'INFO');
+            $cadence_description = $is_cadence_mode
+                ? "{$cadence_count} posts/{$cadence_unit} (~1 every {$interval_days}d)"
+                : "{$posts_per_day} posts/day";
+            sp_log("Settings: {$cadence_description} | Range: {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'YES' : 'NO'), 'INFO');
 
             // === STEP 3: DETERMINE THE STARTING POINT ===
-            if ($force_replan === '1') {
+            if ($is_cadence_mode) {
+                // Week/Month cadence: the anchor is stepped by
+                // sp_advance_cadence_date() for every post in STEP 6 below,
+                // so it never needs a per-day post count.
+                $count_in_day = 0;
+
+                if ($force_replan === '1') {
+                    $current_date = date('Y-m-d', current_time('timestamp'));
+                    sp_log("🧹 'Full Reset' mode enabled: Full reorganization at a {$cadence_count}/{$cadence_unit} cadence", 'INFO');
+                } else {
+                    $current_date = sp_get_cadence_anchor_date();
+                    sp_log("📌 'Adhesive' mode enabled: Resuming from {$current_date} at a {$cadence_count}/{$cadence_unit} cadence", 'INFO');
+                }
+            } elseif ($force_replan === '1') {
                 $tomorrow = date('Y-m-d', strtotime('+1 day', current_time('timestamp')));
                 $current_date = $tomorrow;
                 $count_in_day = 0;
@@ -167,26 +195,31 @@ if (!function_exists('sp_process_scheduling')) {
                 // === STEP 6: PROCESS THE POSTS ===
                 // (locked posts are already excluded by the query, see STEP 4)
                 foreach ($post_ids as $post_id) {
-                    // Check whether the day is full
-                    if ($count_in_day >= $posts_per_day) {
-                        $next_slot = sp_find_next_available_day($current_date, $posts_per_day);
-                        $current_date = $next_slot['date'];
-                        $count_in_day = $next_slot['count'];
-
-                        sp_log("📅 Moving to the next day: {$current_date} ({$count_in_day} post(s) already there)", 'INFO');
-                    }
-
                     // ✨ Generate an ultra-human date for the upcoming slot.
-                    // The counter is only incremented after wp_update_post()
-                    // succeeds (below), so a failed update doesn't "consume" a
-                    // slot.
-                    $new_date = SP_Human_Time_Generator::generate(
-                        $current_date,
-                        $count_in_day + 1,
-                        $posts_per_day,
-                        $start_hour,
-                        $end_hour
-                    );
+                    // In both branches, the date/counter is only committed
+                    // after wp_update_post() succeeds (below), so a failed
+                    // update doesn't "consume" a slot.
+                    if ($is_cadence_mode) {
+                        $candidate_date = sp_advance_cadence_date($current_date, $interval_days);
+                        $new_date = SP_Human_Time_Generator::generate($candidate_date, 1, 1, $start_hour, $end_hour);
+                    } else {
+                        // Check whether the day is full
+                        if ($count_in_day >= $posts_per_day) {
+                            $next_slot = sp_find_next_available_day($current_date, $posts_per_day);
+                            $current_date = $next_slot['date'];
+                            $count_in_day = $next_slot['count'];
+
+                            sp_log("📅 Moving to the next day: {$current_date} ({$count_in_day} post(s) already there)", 'INFO');
+                        }
+
+                        $new_date = SP_Human_Time_Generator::generate(
+                            $current_date,
+                            $count_in_day + 1,
+                            $posts_per_day,
+                            $start_hour,
+                            $end_hour
+                        );
+                    }
 
                     // Update the post
                     $updated_id = wp_update_post(array(
@@ -201,8 +234,12 @@ if (!function_exists('sp_process_scheduling')) {
                         continue;
                     }
 
-                    // The slot is now confirmed occupied: increment only now
-                    $count_in_day++;
+                    // The slot is now confirmed occupied: commit only now
+                    if ($is_cadence_mode) {
+                        $current_date = $candidate_date;
+                    } else {
+                        $count_in_day++;
+                    }
 
                     // Mark as scheduled
                     update_post_meta($post_id, '_is_smart_scheduled', '1');

@@ -15,7 +15,12 @@ function sp_handle_admin_actions() {
     if (isset($_POST['sp_save_settings'])) {
         check_admin_referer('sp_settings_nonce');
 
-        update_option('sp_posts_per_day', max(1, min(50, intval($_POST['sp_posts_per_day']))));
+        $cadence_unit = isset($_POST['sp_cadence_unit']) ? sanitize_text_field(wp_unslash($_POST['sp_cadence_unit'])) : 'day';
+        if (!in_array($cadence_unit, array('day', 'week', 'month'), true)) {
+            $cadence_unit = 'day';
+        }
+        update_option('sp_cadence_unit', $cadence_unit);
+        update_option('sp_cadence_count', max(1, min(500, intval($_POST['sp_cadence_count']))));
         update_option('sp_start_hour', max(0, min(23, intval($_POST['sp_start_hour']))));
         update_option('sp_end_hour', max(0, min(23, intval($_POST['sp_end_hour']))));
         update_option('sp_auto_mode', isset($_POST['sp_auto_mode']) ? '1' : '0');

@@ -106,7 +106,8 @@ function sp_activate_plugin() {
     }
 
     // Default options
-    add_option('sp_posts_per_day', 3);
+    add_option('sp_cadence_unit', 'day');
+    add_option('sp_cadence_count', 3);
     add_option('sp_start_hour', 7);
     add_option('sp_end_hour', 20);
     add_option('sp_auto_mode', '1'); // Enabled by default
@@ -225,6 +226,14 @@ add_action('plugins_loaded', function() {
         // Recreate the tables if needed
         if (class_exists('SP_Database_Manager')) {
             SP_Database_Manager::create_tables();
+        }
+
+        // Migrate the old flat "posts/day" setting to the new cadence
+        // model (day/week/month + count), so existing installs keep their
+        // exact current behavior after the upgrade.
+        if (get_option('sp_cadence_unit', false) === false) {
+            add_option('sp_cadence_unit', 'day');
+            add_option('sp_cadence_count', (int) get_option('sp_posts_per_day', 3));
         }
 
         // Update the version

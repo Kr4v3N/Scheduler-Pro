@@ -12,7 +12,9 @@ global $wpdb;
 
 // 1. Remove all configuration and state options
 $options = array(
-    'sp_posts_per_day',
+    'sp_posts_per_day', // legacy, pre-2.5.1
+    'sp_cadence_unit',
+    'sp_cadence_count',
     'sp_auto_mode',
     'sp_start_hour',
     'sp_end_hour',
