@@ -4,14 +4,25 @@
  *
  * Système de verrouillage pour éviter les exécutions concurrentes.
  *
- * Utilise add_option() plutôt que les transients WordPress : la colonne
- * option_name de wp_options porte une contrainte UNIQUE, ce qui rend
- * add_option() réellement atomique au niveau base de données (l'INSERT
- * concurrent perdant échoue et add_option() retourne false), alors que
- * les transients (get_transient() + set_transient() séparés) exposaient
- * une fenêtre de course classique : deux appelants quasi simultanés
- * pouvaient tous deux lire "pas de verrou" avant que l'un des deux
- * n'écrive le sien.
+ * Stocke les verrous dans wp_options, en SQL direct (INSERT IGNORE / UPDATE
+ * conditionnel), PAS via les transients WordPress ni via add_option().
+ *
+ * IMPORTANT : add_option() n'est PAS une primitive atomique fiable pour ce
+ * cas d'usage, contrairement à ce qu'on pourrait attendre de la contrainte
+ * UNIQUE sur option_name. Le cœur WordPress exécute en réalité un
+ * INSERT ... ON DUPLICATE KEY UPDATE (vérifié dans wp-includes/option.php) :
+ * en cas de conflit, ça ÉCRASE la ligne existante avec les nouvelles valeurs
+ * au lieu d'échouer. Deux appelants concurrents peuvent donc tous les deux
+ * recevoir true, chacun écrasant le verrou de l'autre - exactement le bug
+ * que ce fichier cherche à éliminer. D'où l'usage direct d'INSERT IGNORE
+ * (qui ne touche jamais une ligne existante) pour l'acquisition, et d'un
+ * UPDATE conditionné sur l'ancienne valeur (compare-and-swap) pour le
+ * remplacement d'un verrou périmé.
+ *
+ * Les transients (get_transient() + set_transient() séparés) exposaient le
+ * même genre de fenêtre de course de façon encore plus visible : deux
+ * appelants quasi simultanés pouvaient tous deux lire "pas de verrou" avant
+ * que l'un des deux n'écrive le sien.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -42,23 +53,56 @@ class SP_Lock_Manager {
      * @return bool True si verrou acquis, False si déjà actif
      */
     public static function acquire($lock_name, $timeout = self::DEFAULT_TIMEOUT) {
+        global $wpdb;
+
         $lock_key = self::LOCK_PREFIX . sanitize_key($lock_name);
         $now = time();
 
-        // Tentative atomique : échoue si la clé existe déjà (contrainte UNIQUE en base)
-        if (add_option($lock_key, $now, '', 'no')) {
+        // Tentative d'acquisition atomique via INSERT IGNORE : contrairement à
+        // add_option(), qui exécute en réalité un INSERT ... ON DUPLICATE KEY
+        // UPDATE côté cœur WordPress (vérifié dans wp-includes/option.php),
+        // INSERT IGNORE n'écrase JAMAIS une ligne existante en cas de conflit -
+        // il échoue silencieusement (0 ligne affectée). C'est la seule des deux
+        // requêtes qui garantit qu'un seul appelant concurrent peut gagner.
+        $inserted = $wpdb->query($wpdb->prepare(
+            "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
+            $lock_key, $now
+        ));
+
+        if ($inserted === 1) {
+            wp_cache_delete($lock_key, 'options');
             sp_log("🔒 Verrou acquis sur '{$lock_name}' (timeout: {$timeout}s)", 'INFO');
             return true;
         }
 
-        // La clé existe déjà : vérifier si le verrou est périmé (crash, bug)
-        $existing = (int) get_option($lock_key);
-        $age = $now - $existing;
+        // La clé existe déjà : vérifier si le verrou est périmé (crash, bug).
+        // Lecture en SQL direct (pas get_option()) pour ne jamais risquer de lire
+        // une valeur mise en cache avant l'INSERT IGNORE ci-dessus.
+        $existing = (string) $wpdb->get_var($wpdb->prepare(
+            "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+            $lock_key
+        ));
+        $age = $now - (int) $existing;
 
         if ($age > $timeout) {
-            update_option($lock_key, $now, 'no');
-            sp_log("🔓 Verrou périmé '{$lock_name}' remplacé (âge: {$age}s)", 'WARNING');
-            return true;
+            // Remplacement par compare-and-swap : la clause WHERE inclut la
+            // valeur lue à l'instant, donc l'UPDATE n'affecte une ligne que si
+            // personne d'autre ne l'a déjà remplacée entre la lecture et
+            // l'écriture. Si un autre appelant a gagné entre-temps, $updated
+            // vaut 0 et on abandonne proprement au lieu d'écraser son verrou.
+            $updated = $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
+                $now, $lock_key, $existing
+            ));
+
+            if ($updated === 1) {
+                wp_cache_delete($lock_key, 'options');
+                sp_log("🔓 Verrou périmé '{$lock_name}' remplacé (âge: {$age}s)", 'WARNING');
+                return true;
+            }
+
+            sp_log("⚠️ Verrou '{$lock_name}' repris par un autre appelant entre-temps - abandon", 'WARNING');
+            return false;
         }
 
         sp_log("⚠️ Verrou actif sur '{$lock_name}' (âge: {$age}s) - abandon", 'WARNING');
