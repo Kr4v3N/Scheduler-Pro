@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,7 +36,7 @@ La plupart des plugins de planification utilisent des algorithmes simples qui cr
 * **Traitement par lots (Batching)** : 100 articles à la fois pour éviter les timeouts
 * **Gestion de mémoire** : Arrêt automatique si RAM > 80% pour éviter les crashs
 * **Système de verrouillage** : Empêche les doubles exécutions même en cas de double-clic
-* **Table de queue persistante** : Traçabilité complète avec retry automatique
+* **Table de queue persistante** : Traçabilité et historique complet de chaque planification
 
 **📊 Monitoring Avancé**
 * Dashboard temps réel avec statistiques complètes
@@ -196,6 +196,37 @@ Non. Le scheduler s'exécute en arrière-plan (via cron) et n'a aucun impact sur
 6. **État du Scheduler** - Indicateurs de santé en temps réel
 
 == Changelog ==
+
+= 2.5.0 - 2026-09-03 =
+
+**🔧 Correctifs Critiques**
+* La planification en Mode Adhésif pouvait sauter un bloc entier d'articles lorsque le nombre d'articles restants à traiter devenait inférieur à la taille d'un lot (pagination incompatible avec un filtre qui rétrécit au fil des lots)
+* La table de queue (`wp_scheduler_queue`) n'était jamais créée à l'activation du plugin (ordre des hooks WordPress) : corrigé en chargeant explicitement les classes nécessaires dès l'activation
+
+**🔒 Sécurité**
+* Ajout d'une vérification par nonce sur le test manuel du WP-Cron (CSRF)
+* Le fichier de log n'est plus accessible en HTTP direct (déplacé sous `uploads/`, protégé par `.htaccess` + `index.php`)
+* Sortie systématiquement échappée dans les messages admin
+
+**⚙️ Fiabilité**
+* Verrouillage anti-concurrence réécrit en atomique (élimine une fenêtre de course sur les exécutions simultanées)
+* Le nettoyage quotidien des verrous périmés utilise désormais un seuil cohérent avec le timeout réel du verrou principal
+* La planification quotidienne (00:30) et le nettoyage (03:00) respectent désormais le fuseau horaire réglé dans WordPress, plus celui du serveur PHP
+* Le mode "Grand Ménage" ne se désactive plus automatiquement si le traitement s'est arrêté prématurément (mémoire) : il reprend au prochain lancement
+* Les articles verrouillés sont désormais exclus directement par la requête de planification (au lieu d'être filtrés après coup)
+* Correction d'un comptage qui pouvait gaspiller un créneau horaire en cas d'échec de mise à jour d'un article
+* Correction de l'affichage du graphique de distribution qui excluait les articles du 30e jour publiés après minuit
+* Le résultat du test manuel du WP-Cron s'affiche désormais dans l'interface (auparavant calculé mais jamais montré)
+* Correction de la lecture de `memory_limit` quand il est exprimé en gigaoctets (ex: "1G")
+
+**🧹 Nettoyage**
+* Suppression d'un hook d'activation dupliqué (la création des tables était déclenchée deux fois)
+* Suppression de l'option `sp_excluded_ids`, créée mais jamais utilisée par aucune fonctionnalité
+* Désinstallation complétée : nettoie désormais aussi le cron de nettoyage quotidien, la meta de verrouillage par article, toutes les options du plugin et la table de queue (auparavant partiellement nettoyés)
+* Correction de la documentation : la table de queue sert de traçabilité/historique, elle ne pilote pas (encore) de retry automatique
+
+**🧱 Architecture**
+* Découpage du plugin en fichiers modulaires par responsabilité (`includes/logger.php`, `includes/memory-guard.php`, `includes/time-helpers.php`, `includes/slot-finder.php`, `includes/admin/*.php`) pour faciliter la maintenance — aucun changement de comportement fonctionnel au-delà des correctifs listés ci-dessus
 
 = 2.0.0 - 2026-02-09 =
 
