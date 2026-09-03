@@ -341,11 +341,6 @@ class SP_Database_Manager {
 }
 
 /**
- * Hooks d'activation/désinstallation
- */
-register_activation_hook(SP_PATH . 'scheduler-pro.php', array('SP_Database_Manager', 'create_tables'));
-
-/**
  * Tâche quotidienne de nettoyage
  */
 add_action('sp_daily_cleanup', function() {
