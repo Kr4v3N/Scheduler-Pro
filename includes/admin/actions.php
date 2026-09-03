@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) exit;
 
 function sp_handle_admin_actions() {
     $message = null;
+    $preview = null;
 
     if (isset($_POST['sp_save_settings'])) {
         check_admin_referer('sp_settings_nonce');
@@ -52,6 +53,25 @@ function sp_handle_admin_actions() {
         }
     }
 
+    if (isset($_POST['sp_preview_run'])) {
+        check_admin_referer('sp_run_nonce');
+
+        $result = sp_process_scheduling(true);
+
+        if ($result && $result['success']) {
+            $preview = $result['preview'];
+            $message = array(
+                'type' => 'success',
+                'text' => "👁️ Preview: {$result['processed']} post(s) would be scheduled. Nothing has been changed yet."
+            );
+        } else {
+            $message = array(
+                'type' => 'error',
+                'text' => "❌ Error while building the preview: " . ($result['message'] ?? 'Unknown error')
+            );
+        }
+    }
+
     // Result of the manual WP-Cron test (see includes/heartbeat-monitor.php,
     // 'test_cron' action, which redirects here with these two parameters)
     if (isset($_GET['test_result']) && isset($_GET['page']) && $_GET['page'] === 'scheduler-pro') {
@@ -61,5 +81,5 @@ function sp_handle_admin_actions() {
         );
     }
 
-    return $message;
+    return array('message' => $message, 'preview' => $preview);
 }

@@ -28,7 +28,9 @@ function sp_admin_page_render() {
 
     $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'settings';
 
-    $message = sp_handle_admin_actions();
+    $action_result = sp_handle_admin_actions();
+    $message = $action_result['message'];
+    $preview = $action_result['preview'];
 
     ?>
     <div class="wrap sp-admin-wrap">
@@ -98,7 +100,7 @@ function sp_admin_page_render() {
 
                 case 'settings':
                 default:
-                    sp_render_settings_tab();
+                    sp_render_settings_tab($preview);
                     break;
             }
             ?>

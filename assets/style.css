@@ -428,6 +428,10 @@
 /* === ACTIONS === */
 .sp-actions {
     margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .sp-btn-action {
@@ -820,6 +824,17 @@
     padding: 10px;
     border-bottom: 1px solid var(--sp-gray-100);
 }
+
+.sp-config-table th {
+    padding: 10px;
+    border-bottom: 2px solid var(--sp-gray-200);
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--sp-gray-500);
+}
+
 
 .sp-help-section {
     padding: 15px 0;

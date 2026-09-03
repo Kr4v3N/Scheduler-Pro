@@ -5,7 +5,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-function sp_render_settings_tab() {
+function sp_render_settings_tab($preview = null) {
     $cadence_unit = get_option('sp_cadence_unit', 'day');
     if (!in_array($cadence_unit, array('day', 'week', 'month'), true)) {
         $cadence_unit = 'day';
@@ -192,14 +192,58 @@ function sp_render_settings_tab() {
                         <span class="dashicons dashicons-controls-play"></span>
                         Manual Run
                     </h2>
-                    <p>Run the post scheduling immediately (without waiting for the daily cron)</p>
-                    <button type="submit"
-                            name="sp_run_now"
-                            class="button button-hero sp-btn-action">
-                        🚀 Run Scheduling Now
-                    </button>
+                    <p>Run the post scheduling immediately (without waiting for the daily cron), or preview the result first without changing anything.</p>
+                    <div class="sp-actions">
+                        <button type="submit"
+                                name="sp_preview_run"
+                                class="button button-hero">
+                            👁️ Preview
+                        </button>
+                        <button type="submit"
+                                name="sp_run_now"
+                                class="button button-hero sp-btn-action">
+                            🚀 Run Scheduling Now
+                        </button>
+                    </div>
                 </div>
             </form>
+
+            <?php if (is_array($preview)): ?>
+            <div class="sp-card">
+                <h2 class="sp-card-title">
+                    <span class="dashicons dashicons-visibility"></span>
+                    Preview Result (not applied)
+                </h2>
+
+                <?php if (empty($preview)): ?>
+                    <p class="sp-help-text">No post would be scheduled with the current settings.</p>
+                <?php else: ?>
+                    <table class="sp-config-table">
+                        <thead>
+                            <tr>
+                                <th>Post</th>
+                                <th>Current date</th>
+                                <th></th>
+                                <th>New date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach (array_slice($preview, 0, 50) as $row): ?>
+                                <tr>
+                                    <td><?php echo esc_html($row['title'] !== '' ? $row['title'] : '(no title)'); ?></td>
+                                    <td><?php echo esc_html($row['old_date']); ?></td>
+                                    <td><span class="dashicons dashicons-arrow-right-alt2"></span></td>
+                                    <td><strong><?php echo esc_html($row['new_date']); ?></strong></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php if (count($preview) > 50): ?>
+                        <p class="sp-help-text"><?php echo count($preview) - 50; ?> more post(s) not shown here, but included in the total above.</p>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- Right Column: System Status -->

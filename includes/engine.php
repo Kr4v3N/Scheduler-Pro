@@ -24,9 +24,17 @@ if (!defined('ABSPATH')) exit;
  * IMPORTANT: Only processes posts with post_status = 'future'
  */
 if (!function_exists('sp_process_scheduling')) {
-    function sp_process_scheduling() {
+    /**
+     * @param bool $dry_run When true, simulates the run (same selection and
+     *                      date-generation logic) without writing anything:
+     *                      no wp_update_post(), no meta, no queue entry, no
+     *                      lock. Used by the "Preview" action in Settings.
+     */
+    function sp_process_scheduling($dry_run = false) {
         // === STEP 1: ACQUIRE THE LOCK ===
-        if (!SP_Lock_Manager::acquire('main_scheduling', 600)) {
+        // A dry run only reads: no lock needed, and it must never be
+        // blocked by (or block) a real run in progress.
+        if (!$dry_run && !SP_Lock_Manager::acquire('main_scheduling', 600)) {
             sp_log("❌ A scheduling run is already in progress - aborting", 'ERROR');
             return array(
                 'success' => false,
@@ -36,7 +44,7 @@ if (!function_exists('sp_process_scheduling')) {
         }
 
         try {
-            sp_log("=== STARTING SCHEDULING (FUTURE posts only) ===", 'INFO');
+            sp_log($dry_run ? "=== STARTING PREVIEW (FUTURE posts only, no write) ===" : "=== STARTING SCHEDULING (FUTURE posts only) ===", 'INFO');
 
             // === STEP 2: RETRIEVE SETTINGS ===
             // Cadence: 'day' keeps the original one-or-more-per-day bucket
@@ -125,36 +133,44 @@ if (!function_exists('sp_process_scheduling')) {
                 array('key' => '_sp_lock_planning', 'value' => '1', 'compare' => '!='),
             );
 
-            // IMPORTANT: in Adhesive mode, every processed post drops out of the
-            // next query's result set (its _is_smart_scheduled meta becomes '1',
-            // which is excluded by the meta_query below): the total number of
-            // matching posts therefore SHRINKS with every batch. Paginating by
-            // offset in that case would skip an entire block of posts (the offset
-            // advances faster than the result set shrinks). So offset stays at 0
-            // at all times in Adhesive mode: the query always returns the "next"
-            // batch of still-eligible posts, and we stop as soon as an incomplete
-            // (or empty) batch is returned.
+            // IMPORTANT: in a REAL Adhesive run, every processed post drops out
+            // of the next query's result set (its _is_smart_scheduled meta
+            // becomes '1', which is excluded by the meta_query below): the
+            // total number of matching posts therefore SHRINKS with every
+            // batch. Paginating by offset in that case would skip an entire
+            // block of posts (the offset advances faster than the result set
+            // shrinks). So offset stays at 0 in that case: the query always
+            // returns the "next" batch of still-eligible posts, and we stop
+            // as soon as an incomplete (or empty) batch is returned.
             //
             // In Full Reset mode, the _is_smart_scheduled filter is NOT applied
             // (all non-locked future posts remain eligible even after being
             // processed): the result set does NOT shrink from one batch to the
-            // next, so the offset is still needed to move through the list
-            // without looping back over the same posts.
-            $use_offset = ($force_replan === '1');
+            // next, so the offset is needed to move through the list without
+            // looping back over the same posts. A dry run never writes
+            // anything (no meta, no post_date), so its result set NEVER
+            // shrinks either, regardless of mode - it always needs the offset
+            // too, or it would re-preview the same first batch forever.
+            $use_offset = ($force_replan === '1') || $dry_run;
 
-            // Full Reset mode paginates by offset WHILE the loop rewrites post_date
-            // (via wp_update_post() below) - sorting by date would make that
-            // pagination unstable: a post already processed, once its new date is
-            // applied, can end up positioned before or after posts not yet
-            // processed, shifting "position 100" from one query to the next and
-            // causing posts to be skipped or reprocessed. Sorting by ID (immutable
-            // during execution) keeps that pagination reliable. Adhesive mode
-            // doesn't use the offset (see above) so it doesn't have this problem:
-            // it keeps the chronological sort by date, which makes more sense to
-            // the user.
-            $base_args['orderby'] = $use_offset ? 'ID' : 'date';
+            // A REAL Full Reset run paginates by offset WHILE the loop
+            // rewrites post_date (via wp_update_post() below) - sorting by
+            // date would make that pagination unstable: a post already
+            // processed, once its new date is applied, can end up positioned
+            // before or after posts not yet processed, shifting "position
+            // 100" from one query to the next and causing posts to be
+            // skipped or reprocessed. Sorting by ID (immutable during
+            // execution) keeps that pagination reliable. This instability
+            // only exists when post_date is actually being rewritten, so a
+            // dry run (which never writes) always keeps the chronological
+            // 'date' sort, even in Full Reset mode.
+            $base_args['orderby'] = ($force_replan === '1' && !$dry_run) ? 'ID' : 'date';
 
-            if (!$use_offset) {
+            // Adhesive semantics (skip posts already smart-scheduled) apply
+            // whenever the run - real or previewed - behaves like Adhesive
+            // mode. Only a REAL Full Reset run intentionally reprocesses
+            // everything.
+            if ($force_replan !== '1') {
                 $base_args['meta_query'] = array(
                     'relation' => 'AND',
                     array(
@@ -174,6 +190,7 @@ if (!function_exists('sp_process_scheduling')) {
             $total_processed = 0;
             $batch_number = 1;
             $completed_fully = true;
+            $preview = array(); // Only populated when $dry_run is true
 
             do {
                 // Check memory
@@ -232,17 +249,28 @@ if (!function_exists('sp_process_scheduling')) {
                         );
                     }
 
-                    // Update the post
-                    $updated_id = wp_update_post(array(
-                        'ID'            => $post_id,
-                        'post_date'     => $new_date,
-                        'post_date_gmt' => get_gmt_from_date($new_date),
-                        'edit_date'     => true
-                    ), true);
+                    if ($dry_run) {
+                        // No write: nothing can fail, so the slot is always
+                        // "confirmed" for a preview.
+                        $preview[] = array(
+                            'id'       => $post_id,
+                            'title'    => get_the_title($post_id),
+                            'old_date' => get_post_field('post_date', $post_id),
+                            'new_date' => $new_date,
+                        );
+                    } else {
+                        // Update the post
+                        $updated_id = wp_update_post(array(
+                            'ID'            => $post_id,
+                            'post_date'     => $new_date,
+                            'post_date_gmt' => get_gmt_from_date($new_date),
+                            'edit_date'     => true
+                        ), true);
 
-                    if (is_wp_error($updated_id)) {
-                        sp_log("❌ ERROR: Post ID {$post_id} - " . $updated_id->get_error_message(), 'ERROR');
-                        continue;
+                        if (is_wp_error($updated_id)) {
+                            sp_log("❌ ERROR: Post ID {$post_id} - " . $updated_id->get_error_message(), 'ERROR');
+                            continue;
+                        }
                     }
 
                     // The slot is now confirmed occupied: commit only now
@@ -252,14 +280,16 @@ if (!function_exists('sp_process_scheduling')) {
                         $count_in_day++;
                     }
 
-                    // Mark as scheduled
-                    update_post_meta($post_id, '_is_smart_scheduled', '1');
+                    if (!$dry_run) {
+                        // Mark as scheduled
+                        update_post_meta($post_id, '_is_smart_scheduled', '1');
+                    }
 
-                    sp_log("✅ Post ID {$post_id} → {$new_date}", 'SUCCESS');
+                    sp_log(($dry_run ? "👁️ [Preview] Post ID {$post_id} → {$new_date}" : "✅ Post ID {$post_id} → {$new_date}"), 'SUCCESS');
                     $total_processed++;
 
                     // Optional: add to the queue table
-                    if (class_exists('SP_Database_Manager')) {
+                    if (!$dry_run && class_exists('SP_Database_Manager')) {
                         SP_Database_Manager::add_task(
                             $post_id,
                             $new_date,
@@ -302,29 +332,35 @@ if (!function_exists('sp_process_scheduling')) {
             } while ($use_offset ? ($query->found_posts > $offset) : (count($post_ids) === $batch_size));
 
             // === STEP 7: WRAP-UP ===
-
-            // Only disable Full Reset mode if processing ran to its natural
-            // conclusion (result set exhausted). If it stopped prematurely
-            // (critical memory), leave it enabled: otherwise the reorganization
-            // would be declared complete while posts remain unprocessed.
-            if ($force_replan === '1') {
-                if ($completed_fully) {
-                    update_option('sp_force_replan', '0');
-                    sp_log("🔄 'Full Reset' mode automatically disabled (processing complete)", 'INFO');
-                } else {
-                    sp_log("⚠️ 'Full Reset' mode left enabled: processing stopped prematurely (memory). Re-run the scheduler to finish.", 'WARNING');
+            // A dry run never mutates plugin state: no Full Reset toggle
+            // change, no heartbeat update - a preview must be a pure read.
+            if (!$dry_run) {
+                // Only disable Full Reset mode if processing ran to its natural
+                // conclusion (result set exhausted). If it stopped prematurely
+                // (critical memory), leave it enabled: otherwise the reorganization
+                // would be declared complete while posts remain unprocessed.
+                if ($force_replan === '1') {
+                    if ($completed_fully) {
+                        update_option('sp_force_replan', '0');
+                        sp_log("🔄 'Full Reset' mode automatically disabled (processing complete)", 'INFO');
+                    } else {
+                        sp_log("⚠️ 'Full Reset' mode left enabled: processing stopped prematurely (memory). Re-run the scheduler to finish.", 'WARNING');
+                    }
                 }
+
+                // Heartbeat
+                update_option('sp_last_cron_run', time());
             }
 
-            // Heartbeat
-            update_option('sp_last_cron_run', time());
-
-            sp_log("=== SCHEDULING FINISHED: {$total_processed} FUTURE posts processed ===", 'SUCCESS');
+            sp_log(($dry_run ? "=== PREVIEW FINISHED: {$total_processed} FUTURE posts would be processed ===" : "=== SCHEDULING FINISHED: {$total_processed} FUTURE posts processed ==="), 'SUCCESS');
 
             return array(
                 'success' => true,
-                'message' => "{$total_processed} posts successfully scheduled",
-                'processed' => $total_processed
+                'message' => $dry_run
+                    ? "{$total_processed} posts would be scheduled"
+                    : "{$total_processed} posts successfully scheduled",
+                'processed' => $total_processed,
+                'preview' => $preview,
             );
 
         } catch (Exception $e) {
@@ -334,11 +370,14 @@ if (!function_exists('sp_process_scheduling')) {
             return array(
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
-                'processed' => 0
+                'processed' => 0,
+                'preview' => array(),
             );
 
         } finally {
-            SP_Lock_Manager::release('main_scheduling');
+            if (!$dry_run) {
+                SP_Lock_Manager::release('main_scheduling');
+            }
         }
     }
 }

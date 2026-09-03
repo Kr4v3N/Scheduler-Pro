@@ -15,10 +15,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 2. Button handling (loading state)
+    // Some forms (e.g. Preview / Run Now) contain more than one
+    // .button-hero: target the actual submitter, not just the first match,
+    // so the right button shows the loading state.
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
-        form.addEventListener('submit', function() {
-            const btn = this.querySelector('.button-hero');
+        form.addEventListener('submit', function(event) {
+            const submitter = event.submitter;
+            const btn = (submitter && submitter.classList.contains('button-hero'))
+                ? submitter
+                : this.querySelector('.button-hero');
             if (btn) {
                 const originalText = btn.innerHTML;
                 btn.style.width = btn.offsetWidth + 'px'; // Keep the width
