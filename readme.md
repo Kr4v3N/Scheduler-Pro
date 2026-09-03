@@ -8,346 +8,346 @@ Stable tag: 2.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Planificateur automatique ultra-intelligent pour WordPress : gestion avancée de la publication d'articles avec comportement humain et monitoring en temps réel.
+Ultra-smart automatic scheduler for WordPress: advanced post publishing management with human-like behavior and real-time monitoring.
 
 == Description ==
 
-**Scheduler Pro** est un plugin WordPress professionnel qui automatise et optimise la planification de vos articles avec une approche révolutionnaire : imiter le comportement humain.
+**Scheduler Pro** is a professional WordPress plugin that automates and optimizes your post scheduling with a revolutionary approach: mimicking human behavior.
 
-= 🎯 Pourquoi Scheduler Pro ? =
+= 🎯 Why Scheduler Pro? =
 
-La plupart des plugins de planification utilisent des algorithmes simples qui créent des patterns détectables. **Scheduler Pro v2.0** va beaucoup plus loin :
+Most scheduling plugins use simple algorithms that create detectable patterns. **Scheduler Pro v2.5** goes much further:
 
-* **Distribution gaussienne** avec pics d'activité à 9h, 14h et 17h
-* **Évitement des patterns** : minutes et secondes variables, jamais de valeurs trop rondes
-* **Traitement par lots** : Gère des milliers d'articles sans timeout
-* **Système de verrouillage** : Évite les exécutions concurrentes
-* **Monitoring temps réel** : Tableau de bord complet avec statistiques
+* **Gaussian distribution** with activity peaks at 9am, 2pm and 5pm
+* **Pattern avoidance**: variable minutes and seconds, never overly round values
+* **Batch processing**: handles thousands of posts without timing out
+* **Locking system**: prevents concurrent runs
+* **Real-time monitoring**: full dashboard with statistics
 
-= ✨ Fonctionnalités Principales v2.0 =
+= ✨ Core Features =
 
-**🚀 Planification Ultra-Humaine**
-* Générateur de dates basé sur des distributions gaussiennes
-* Pics d'activité naturels aux heures de forte publication
-* Minutes aléatoires évitant les valeurs rondes (00, 15, 30, 45)
-* Secondes variables pour éliminer tout pattern détectable
+**🚀 Ultra-Human Scheduling**
+* Date generator based on gaussian distributions
+* Natural activity peaks at high-publishing hours
+* Random minutes avoiding round values (00, 15, 30, 45)
+* Variable seconds to eliminate any detectable pattern
 
-**⚡ Performance & Fiabilité**
-* **Traitement par lots (Batching)** : 100 articles à la fois pour éviter les timeouts
-* **Gestion de mémoire** : Arrêt automatique si RAM > 80% pour éviter les crashs
-* **Système de verrouillage** : Empêche les doubles exécutions même en cas de double-clic
-* **Table de queue persistante** : Traçabilité et historique complet de chaque planification
+**⚡ Performance & Reliability**
+* **Batch processing**: 100 posts at a time to avoid timeouts
+* **Memory management**: stops automatically if RAM usage exceeds 80% to avoid crashes
+* **Locking system**: prevents duplicate runs, even on a double-click, via atomic direct SQL queries
+* **Persistent task queue**: full traceability and history of every scheduling run
 
-**📊 Monitoring Avancé**
-* Dashboard temps réel avec statistiques complètes
-* Graphique de distribution sur 30 jours
-* Détection automatique des problèmes (cron inactif, tâches bloquées)
-* Journal d'activité avec rotation automatique des logs
+**📊 Advanced Monitoring**
+* Real-time dashboard with full statistics
+* 30-day distribution chart
+* Automatic issue detection (inactive cron, stuck tasks)
+* Activity log with automatic rotation
 
-**🔧 Configuration Intelligente**
-* **Mode Adhésif** : Ajoute les nouveaux articles à la suite sans toucher aux existants
-* **Mode Grand Ménage** : Réorganise TOUT le stock depuis demain
-* **Verrouillage manuel** : Bloquez la date de certains articles spécifiques
-* **Plage horaire personnalisée** : 7h-20h par défaut, ajustable à vos besoins
+**🔧 Smart Configuration**
+* **Adhesive Mode**: adds new posts after the existing ones without touching them
+* **Full Reset Mode**: reorganizes the ENTIRE backlog starting tomorrow
+* **Manual locking**: lock the date of specific posts
+* **Custom time range**: 7am-8pm by default, adjustable to your needs
 
-= 🎨 Interface Moderne =
+= 🎨 Modern Interface =
 
-**Onglets Intuitifs**
-* **Réglages** : Configuration complète avec simulateur interactif
-* **Monitoring** : Vue d'ensemble de la santé du système
-* **Logs** : Journal d'activité en temps réel avec filtrage par niveau
-* **À Propos** : Documentation et aide intégrée
+**Intuitive Tabs**
+* **Settings**: full configuration with an interactive simulator
+* **Monitoring**: overview of system health
+* **Logs**: real-time activity log with level filtering
+* **About**: built-in documentation and help
 
-**Design Épuré**
-* Interface moderne et responsive
-* Statistiques visuelles avec graphiques
-* Indicateurs de santé en temps réel
-* Thème sombre pour les logs
+**Clean Design**
+* Modern, responsive interface
+* Visual statistics with charts
+* Real-time health indicators
+* Dark theme for the logs
 
-= 📈 Cas d'Usage =
+= 📈 Use Cases =
 
-**Blog SEO**
-Publiez régulièrement sans effort, avec une apparence 100% naturelle pour les moteurs de recherche.
+**SEO Blog**
+Publish regularly with no effort, with a 100% natural appearance for search engines.
 
-**Site Multi-Auteurs**
-Gérez des centaines d'articles planifiés avec des priorités et des verrouillages individuels.
+**Multi-Author Site**
+Manage hundreds of scheduled posts with individual priorities and locks.
 
-**Plateforme de Contenu**
-Automatisez la publication de milliers d'articles avec une fiabilité professionnelle.
+**Content Platform**
+Automate the publication of thousands of posts with professional reliability.
 
-= 🔒 Sécurité & Confidentialité =
+= 🔒 Security & Privacy =
 
-* Aucune donnée externe : tout reste sur votre serveur
-* Vérification des permissions (nonces, capabilities)
-* Verrouillage anti-concurrence via transients WordPress
-* Rotation automatique des logs (limite à 500 lignes)
+* No external data: everything stays on your server
+* Permission checks (nonces, capabilities)
+* Anti-concurrency locking via atomic direct SQL queries
+* Automatic log rotation (500-line limit)
 
-= ⚙️ Configuration Technique =
+= ⚙️ Technical Requirements =
 
-**Prérequis**
+**Requirements**
 * WordPress 5.8+
 * PHP 7.4+
 * MySQL 5.7+
-* Mémoire PHP : 128 Mo minimum (256 Mo recommandé)
+* PHP memory: 128 MB minimum (256 MB recommended)
 
-**Compatibilité**
+**Compatibility**
 * ✅ Multisite
-* ✅ WP-Cron et Cron serveur
-* ✅ Tous les thèmes WordPress
-* ✅ Compatible WPML
+* ✅ WP-Cron and server cron
+* ✅ All WordPress themes
+* ✅ WPML compatible
 
 **Performance**
-* **Avant v2.0** : 1000 articles = ~50s (timeout fréquent)
-* **Après v2.0** : 1000 articles = ~5s ✅
-* Impact mémoire : ~50 Mo (vs 500 Mo en v1.x)
+* **Before v2.0**: 1000 posts = ~50s (frequent timeouts)
+* **After v2.0**: 1000 posts = ~5s ✅
+* Memory footprint: ~50 MB (vs 500 MB in v1.x)
 
 == Installation ==
 
-= Installation Automatique =
+= Automatic Installation =
 
-1. Connectez-vous à votre admin WordPress
-2. Allez dans **Extensions > Ajouter**
-3. Recherchez "Scheduler Pro"
-4. Cliquez sur **Installer** puis **Activer**
+1. Log in to your WordPress admin
+2. Go to **Plugins > Add New**
+3. Search for "Scheduler Pro"
+4. Click **Install** then **Activate**
 
-= Installation Manuelle =
+= Manual Installation =
 
-1. Téléchargez le fichier ZIP du plugin
-2. Allez dans **Extensions > Ajouter > Téléverser une extension**
-3. Choisissez le fichier ZIP et cliquez sur **Installer**
-4. Activez le plugin
+1. Download the plugin's ZIP file
+2. Go to **Plugins > Add New > Upload Plugin**
+3. Choose the ZIP file and click **Install**
+4. Activate the plugin
 
-= Configuration Initiale =
+= Initial Configuration =
 
-1. Allez dans **Scheduler Pro** dans le menu admin
-2. Configurez vos réglages :
-   * **Articles/jour** : 3-5 recommandé pour un comportement naturel
-   * **Plage horaire** : 7h-20h pour imiter l'activité humaine
-   * **Mode Auto** : Activé pour exécution quotidienne à 00:30
-3. Sauvegardez les réglages
-4. Cliquez sur **"Lancer la Planification Maintenant"** pour le premier test
+1. Go to **Scheduler Pro** in the admin menu
+2. Configure your settings:
+   * **Posts/day**: 3-5 recommended for natural-looking behavior
+   * **Time range**: 7am-8pm to mimic human activity
+   * **Auto mode**: enabled for a daily run at 00:30
+3. Save your settings
+4. Click **"Run Scheduling Now"** for the first test
 
-= Configuration Avancée (Optionnel) =
+= Advanced Configuration (Optional) =
 
-**Configurer un Cron Serveur (Recommandé)**
+**Set Up a Server Cron (Recommended)**
 
-Pour une fiabilité maximale, remplacez WP-Cron par un vrai cron serveur :
+For maximum reliability, replace WP-Cron with a real server cron:
 
-1. **Désactiver WP-Cron** : Ajoutez dans `wp-config.php`
+1. **Disable WP-Cron**: add this to `wp-config.php`
 ```php
 define('DISABLE_WP_CRON', true);
 ```
 
-2. **Créer une tâche cron** (cPanel ou SSH)
+2. **Create a cron job** (cPanel or SSH)
 ```bash
-*/15 * * * * wget -q -O - https://votre-site.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1
+*/15 * * * * wget -q -O - https://your-site.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1
 ```
 
-Ou via PHP :
+Or via PHP:
 ```bash
-*/15 * * * * cd /chemin/vers/wordpress && php wp-cron.php >/dev/null 2>&1
+*/15 * * * * cd /path/to/wordpress && php wp-cron.php >/dev/null 2>&1
 ```
 
 == Frequently Asked Questions ==
 
-= Le plugin fonctionne-t-il sur tous les hébergements ? =
+= Does the plugin work on all hosting providers? =
 
-Oui ! Scheduler Pro est compatible avec tous les hébergements WordPress standards. Pour les hébergements mutualisés avec des limites strictes, le système de batching et de gestion mémoire garantit un fonctionnement sans timeout.
+Yes! Scheduler Pro is compatible with all standard WordPress hosting. On shared hosting with strict limits, the batching and memory management system guarantees timeout-free operation.
 
-= Puis-je verrouiller certains articles pour qu'ils ne soient pas replanifiés ? =
+= Can I lock certain posts so they don't get rescheduled? =
 
-Absolument ! Chaque article dispose d'une meta box "Scheduler Pro : Verrouillage" dans la barre latérale de l'éditeur. Cochez simplement la case pour bloquer la date de cet article.
+Absolutely! Every post has a "Scheduler Pro: Locking" meta box in the editor's sidebar. Just check the box to lock that post's date.
 
-= Que se passe-t-il si j'ajoute de nouveaux articles ? =
+= What happens if I add new posts? =
 
-En **Mode Adhésif** (par défaut), les nouveaux articles sont ajoutés à la suite du planning existant sans modifier les articles déjà planifiés. En **Mode Grand Ménage**, tout est réorganisé depuis demain.
+In **Adhesive Mode** (default), new posts are added after the existing schedule without modifying already-scheduled posts. In **Full Reset Mode**, everything is reorganized starting tomorrow.
 
-= Pourquoi mes articles ne sont-ils pas planifiés exactement à intervalles réguliers ? =
+= Why aren't my posts scheduled at exactly regular intervals? =
 
-C'est voulu ! Le générateur ultra-humain de Scheduler Pro évite les patterns détectables. Les heures varient selon des pics d'activité (9h, 14h, 17h) et les minutes/secondes sont aléatoires pour imiter un comportement naturel.
+That's intentional! Scheduler Pro's ultra-human generator avoids detectable patterns. Hours vary according to activity peaks (9am, 2pm, 5pm) and minutes/seconds are randomized to mimic natural behavior.
 
-= Le WP-Cron est-il fiable pour l'automatisation ? =
+= Is WP-Cron reliable for automation? =
 
-Le WP-Cron dépend du trafic de votre site. Pour une fiabilité maximale (99.9%), nous recommandons fortement de configurer un cron serveur (voir section Installation > Configuration Avancée).
+WP-Cron depends on your site's traffic. For maximum reliability (99.9%), we strongly recommend setting up a server cron (see the Installation > Advanced Configuration section).
 
-= Combien d'articles le plugin peut-il gérer ? =
+= How many posts can the plugin handle? =
 
-Scheduler Pro v2.0 peut gérer **des milliers d'articles** grâce au système de batching. Testé avec succès sur 10 000 articles planifiés.
+Scheduler Pro v2.5 can handle **thousands of posts** thanks to its batching system. Successfully tested with 10,000 scheduled posts.
 
-= Le plugin est-il compatible avec Gutenberg / Elementor / autres builders ? =
+= Is the plugin compatible with Gutenberg / Elementor / other builders? =
 
-Oui ! Scheduler Pro travaille au niveau de la base de données WordPress et est donc compatible avec tous les éditeurs et page builders.
+Yes! Scheduler Pro operates at the WordPress database level, so it's compatible with every editor and page builder.
 
-= Puis-je voir l'historique des planifications ? =
+= Can I see the scheduling history? =
 
-Oui, consultez l'onglet **"Journal d'Activité"** pour voir toutes les exécutions du scheduler avec horodatage, statut et détails.
+Yes, check the **"Activity Log"** tab to see every scheduler run with timestamp, status and details.
 
-= Le plugin ralentit-il mon site ? =
+= Does the plugin slow down my site? =
 
-Non. Le scheduler s'exécute en arrière-plan (via cron) et n'a aucun impact sur les performances front-end. L'exécution elle-même est optimisée pour utiliser le minimum de ressources.
+No. The scheduler runs in the background (via cron) and has no impact on front-end performance. The run itself is optimized to use minimal resources.
 
 == Screenshots ==
 
-1. **Onglet Réglages** - Interface moderne avec simulateur interactif
-2. **Onglet Monitoring** - Dashboard temps réel avec statistiques et graphiques
-3. **Onglet Logs** - Journal d'activité avec filtrage et thème sombre
-4. **Meta Box Verrouillage** - Bloquez manuellement la date d'un article
-5. **Distribution Visuelle** - Graphique des publications sur 30 jours
-6. **État du Scheduler** - Indicateurs de santé en temps réel
+1. **Settings Tab** - Modern interface with an interactive simulator
+2. **Monitoring Tab** - Real-time dashboard with statistics and charts
+3. **Logs Tab** - Activity log with filtering and a dark theme
+4. **Locking Meta Box** - Manually lock a post's date
+5. **Visual Distribution** - Chart of publications over 30 days
+6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
 
 = 2.5.0 - 2026-09-03 =
 
-**🔧 Correctifs Critiques**
-* La planification en Mode Adhésif pouvait sauter un bloc entier d'articles lorsque le nombre d'articles restants à traiter devenait inférieur à la taille d'un lot (pagination incompatible avec un filtre qui rétrécit au fil des lots)
-* La table de queue (`wp_scheduler_queue`) n'était jamais créée à l'activation du plugin (ordre des hooks WordPress) : corrigé en chargeant explicitement les classes nécessaires dès l'activation
+**🔧 Critical Fixes**
+* Scheduling in Adhesive Mode could skip an entire block of posts once the number of remaining posts dropped below a batch's size (pagination was incompatible with a filter that shrinks as batches progress)
+* The task queue table (`wp_scheduler_queue`) was never created on plugin activation (WordPress hook ordering): fixed by explicitly loading the required classes on activation
 
-**🔒 Sécurité**
-* Ajout d'une vérification par nonce sur le test manuel du WP-Cron (CSRF)
-* Le fichier de log n'est plus accessible en HTTP direct (déplacé sous `uploads/`, protégé par `.htaccess` + `index.php`)
-* Sortie systématiquement échappée dans les messages admin
+**🔒 Security**
+* Added a nonce check on the manual WP-Cron test (CSRF)
+* The log file is no longer reachable via direct HTTP access (moved under `uploads/`, protected by `.htaccess` + `index.php`)
+* Output consistently escaped in admin messages
 
-**⚙️ Fiabilité**
-* Verrouillage anti-concurrence réécrit en atomique (élimine une fenêtre de course sur les exécutions simultanées)
-* Le nettoyage quotidien des verrous périmés utilise désormais un seuil cohérent avec le timeout réel du verrou principal
-* La planification quotidienne (00:30) et le nettoyage (03:00) respectent désormais le fuseau horaire réglé dans WordPress, plus celui du serveur PHP
-* Le mode "Grand Ménage" ne se désactive plus automatiquement si le traitement s'est arrêté prématurément (mémoire) : il reprend au prochain lancement
-* Les articles verrouillés sont désormais exclus directement par la requête de planification (au lieu d'être filtrés après coup)
-* Correction d'un comptage qui pouvait gaspiller un créneau horaire en cas d'échec de mise à jour d'un article
-* Correction de l'affichage du graphique de distribution qui excluait les articles du 30e jour publiés après minuit
-* Le résultat du test manuel du WP-Cron s'affiche désormais dans l'interface (auparavant calculé mais jamais montré)
-* Correction de la lecture de `memory_limit` quand il est exprimé en gigaoctets (ex: "1G")
+**⚙️ Reliability**
+* Anti-concurrency locking rewritten to be atomic (eliminates a race window on concurrent runs)
+* The daily cleanup of stale locks now uses a threshold consistent with the main lock's actual timeout
+* Daily scheduling (00:30) and cleanup (03:00) now honor the timezone configured in WordPress instead of the PHP server's
+* "Full Reset" mode no longer disables itself automatically if processing stopped prematurely (memory): it resumes on the next run
+* Locked posts are now excluded directly by the scheduling query (instead of being filtered afterward)
+* Fixed a counter that could waste a time slot when a post update failed
+* Fixed the distribution chart, which used to exclude day-30 posts published after midnight
+* The manual WP-Cron test result is now displayed in the interface (previously computed but never shown)
+* Fixed reading `memory_limit` when expressed in gigabytes (e.g. "1G")
 
-**🧹 Nettoyage**
-* Suppression d'un hook d'activation dupliqué (la création des tables était déclenchée deux fois)
-* Suppression de l'option `sp_excluded_ids`, créée mais jamais utilisée par aucune fonctionnalité
-* Désinstallation complétée : nettoie désormais aussi le cron de nettoyage quotidien, la meta de verrouillage par article, toutes les options du plugin et la table de queue (auparavant partiellement nettoyés)
-* Correction de la documentation : la table de queue sert de traçabilité/historique, elle ne pilote pas (encore) de retry automatique
+**🧹 Cleanup**
+* Removed a duplicate activation hook (table creation used to be triggered twice)
+* Removed the `sp_excluded_ids` option, created but never used by any feature
+* Completed uninstallation: now also cleans up the daily cleanup cron, the per-post lock meta, all plugin options, and the queue table (previously only partially cleaned up)
+* Corrected the documentation: the queue table provides traceability/history, it does not (yet) drive automatic retries
 
 **🧱 Architecture**
-* Découpage du plugin en fichiers modulaires par responsabilité (`includes/logger.php`, `includes/memory-guard.php`, `includes/time-helpers.php`, `includes/slot-finder.php`, `includes/admin/*.php`) pour faciliter la maintenance — aucun changement de comportement fonctionnel au-delà des correctifs listés ci-dessus
+* Split the plugin into modular files by responsibility (`includes/logger.php`, `includes/memory-guard.php`, `includes/time-helpers.php`, `includes/slot-finder.php`, `includes/admin/*.php`) to make maintenance easier — no functional behavior change beyond the fixes listed above
 
 = 2.0.0 - 2026-02-09 =
 
-**🎉 Version Majeure - Refonte Complète**
+**🎉 Major Version - Complete Overhaul**
 
-**✨ Nouvelles Fonctionnalités**
-* Générateur de dates ultra-humain avec distribution gaussienne
-* Pics d'activité à 9h, 14h, 17h pour imiter le comportement naturel
-* Évitement des patterns : minutes et secondes variables
-* Système de verrouillage anti-concurrence avec transients
-* Table de queue persistante (`wp_scheduler_queue`) pour traçabilité
-* Monitoring temps réel avec dashboard interactif
-* Onglets modernes : Réglages, Monitoring, Logs, À Propos
-* Graphique de distribution sur 30 jours
-* Détection automatique des problèmes (cron inactif, tâches bloquées)
+**✨ New Features**
+* Ultra-human date generator with gaussian distribution
+* Activity peaks at 9am, 2pm, 5pm to mimic natural behavior
+* Pattern avoidance: variable minutes and seconds
+* Anti-concurrency locking system with transients
+* Persistent task queue (`wp_scheduler_queue`) for traceability
+* Real-time monitoring with an interactive dashboard
+* Modern tabs: Settings, Monitoring, Logs, About
+* 30-day distribution chart
+* Automatic issue detection (inactive cron, stuck tasks)
 
-**⚡ Améliorations de Performance**
-* Traitement par lots (batching) : 100 articles à la fois
-* Gestion intelligente de la mémoire (arrêt si RAM > 80%)
-* Requêtes SQL optimisées avec index
-* Rotation automatique des logs (limite 500 lignes)
-* Réduction de 90% du temps d'exécution (1000 articles : 50s → 5s)
-* Réduction de 90% de l'utilisation mémoire (500 Mo → 50 Mo)
+**⚡ Performance Improvements**
+* Batch processing: 100 posts at a time
+* Smart memory management (stops if RAM > 80%)
+* Optimized SQL queries with indexes
+* Automatic log rotation (500-line limit)
+* 90% reduction in execution time (1000 posts: 50s → 5s)
+* 90% reduction in memory usage (500 MB → 50 MB)
 
-**🐛 Corrections de Bugs Critiques**
-* CRIT-01 : Absence de traitement par lots → Timeout corrigé
-* CRIT-02 : Pas de gestion mémoire → Arrêt automatique ajouté
-* CRIT-03 : Logique "trous entre dates" cassée → 100% corrigée
-* CRIT-04 : Pas de système de verrouillage → Implémenté
-* Comptage correct des articles non verrouillés
-* Vérification anti-planification dans le passé
-* Recomptage à chaque changement de date
+**🐛 Critical Bug Fixes**
+* CRIT-01: Missing batch processing → timeout fixed
+* CRIT-02: No memory management → automatic stop added
+* CRIT-03: Broken "gaps between dates" logic → 100% fixed
+* CRIT-04: No locking system → implemented
+* Correct counting of non-locked posts
+* Anti-past-scheduling check
+* Recount on every date change
 
-**🎨 Interface Utilisateur**
-* Design moderne et épuré
-* Système d'onglets intuitifs
-* Statistiques visuelles avec graphiques
-* Indicateurs de santé en temps réel
-* Thème sombre pour les logs
+**🎨 User Interface**
+* Modern, clean design
+* Intuitive tab system
+* Visual statistics with charts
+* Real-time health indicators
+* Dark theme for the logs
 * Responsive (mobile-friendly)
 
-**🔧 Améliorations Techniques**
-* Architecture MVC modulaire
-* Classes séparées : Lock Manager, Database Manager, Heartbeat Monitor
-* Fonctions helper pour compatibilité
-* Hooks WordPress standards
-* Code documenté en français
-* Tests unitaires inclus
+**🔧 Technical Improvements**
+* Modular MVC architecture
+* Separate classes: Lock Manager, Database Manager, Heartbeat Monitor
+* Helper functions for compatibility
+* Standard WordPress hooks
+* Documented codebase
+* Unit tests included
 
 **📚 Documentation**
-* README complet avec cas d'usage
-* Guide de migration v1.7 → v2.0
-* Analyse comparative des versions
-* Guide de décision pour choisir la bonne version
-* FAQ étendue
+* Full README with use cases
+* v1.7 → v2.0 migration guide
+* Version comparison analysis
+* Decision guide for choosing the right version
+* Extended FAQ
 
 = 1.7.0 - 2026-02-08 =
-* Ajout du système de logs natif
-* Interface de diagnostic (onglet Journal d'activité)
-* Rotation automatique des logs
-* Optimisation pour cron externe
-* Mode "Grand Ménage" et "Mode Adhésif"
+* Added native logging system
+* Diagnostics interface (Activity Log tab)
+* Automatic log rotation
+* Optimized for external cron
+* "Full Reset" and "Adhesive" modes
 
 = 1.0.0 - 2025-12-15 =
-* Version initiale
-* Planification automatique de base
-* WP-Cron quotidien
-* Heures aléatoires simples
+* Initial version
+* Basic automatic scheduling
+* Daily WP-Cron
+* Simple random hours
 
 == Upgrade Notice ==
 
 = 2.0.0 =
-**Version majeure avec refonte complète !** 
-Performance multipliée par 10, nouveau système de monitoring, générateur ultra-humain.
-Sauvegardez votre base de données avant la mise à jour.
-Compatible avec v1.7 - migration automatique.
+**Major version with a complete overhaul!**
+10x performance, new monitoring system, ultra-human generator.
+Back up your database before updating.
+Compatible with v1.7 - automatic migration.
 
 = 1.7.0 =
-Ajout du système de logs et du mode Grand Ménage. Mise à jour recommandée.
+Added the logging system and "Full Reset" mode. Update recommended.
 
 == Additional Info ==
 
-= Crédits =
-* Développé par Kr4v3n
-* Tests et validation : Communauté WordPress
+= Credits =
+* Developed by Kr4v3n
+* Testing and validation: WordPress community
 
 = Support =
-* Documentation : Consultez le README et les guides fournis
-* Debug : Activez WP_DEBUG dans wp-config.php
-* Logs : Consultez l'onglet "Journal d'Activité"
+* Documentation: check the README and the bundled guides
+* Debug: enable WP_DEBUG in wp-config.php
+* Logs: check the "Activity Log" tab
 
-= Contributeurs =
-Merci à tous ceux qui ont contribué au développement et aux tests de Scheduler Pro !
+= Contributors =
+Thanks to everyone who contributed to developing and testing Scheduler Pro!
 
-= Licence =
+= License =
 GPLv2 or later - https://www.gnu.org/licenses/gpl-2.0.html
 
-Ce programme est un logiciel libre ; vous pouvez le redistribuer et/ou le modifier selon les termes de la GNU General Public License telle que publiée par la Free Software Foundation.
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation.
 
-= Confidentialité =
-Scheduler Pro ne collecte aucune donnée. Tout reste sur votre serveur WordPress.
-Aucune connexion externe, aucun tracking, aucune télémétrie.
+= Privacy =
+Scheduler Pro collects no data. Everything stays on your WordPress server.
+No external connections, no tracking, no telemetry.
 
 == Roadmap ==
 
 **v2.1 (Q2 2026)**
-* Intégration Action Scheduler (alternative au WP-Cron)
-* API REST pour contrôle externe
-* Export/Import de configurations
-* Profils de planification multiples
+* Action Scheduler integration (WP-Cron alternative)
+* REST API for external control
+* Configuration export/import
+* Multiple scheduling profiles
 
 **v2.2 (Q3 2026)**
-* Support des Custom Post Types
-* Planification conditionnelle (catégories, tags)
-* Webhook sur événements
-* Intégration native Google Search Console
+* Custom Post Type support
+* Conditional scheduling (categories, tags)
+* Event webhooks
+* Native Google Search Console integration
 
 **v3.0 (Q4 2026)**
-* Interface React moderne
-* Dashboard analytics avancé
-* Machine Learning pour optimisation auto
-* Support multisite amélioré
+* Modern React interface
+* Advanced analytics dashboard
+* Machine learning for automatic optimization
+* Improved multisite support
 
-Suggestions ? Créez un ticket sur notre GitHub !
+Suggestions? Open a ticket on our GitHub!
