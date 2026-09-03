@@ -1,11 +1,10 @@
 <?php
 /**
- * ADMIN : TRAITEMENT DES ACTIONS - Scheduler Pro v2.5
+ * ADMIN: ACTION HANDLING - Scheduler Pro v2.5
  *
- * Traite les soumissions de formulaire (sauvegarde des réglages,
- * exécution manuelle) et le résultat du test manuel du cron
- * (includes/heartbeat-monitor.php redirige vers ?test_result=...) avant
- * tout rendu HTML de la page admin.
+ * Processes form submissions (saving settings, manual run) and the
+ * manual cron test result (includes/heartbeat-monitor.php redirects to
+ * ?test_result=...) before any HTML is rendered on the admin page.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -22,7 +21,7 @@ function sp_handle_admin_actions() {
         update_option('sp_auto_mode', isset($_POST['sp_auto_mode']) ? '1' : '0');
         update_option('sp_force_replan', isset($_POST['sp_force_replan']) ? '1' : '0');
 
-        $message = array('type' => 'success', 'text' => '✅ Réglages sauvegardés avec succès !');
+        $message = array('type' => 'success', 'text' => '✅ Settings saved successfully!');
     }
 
     if (isset($_POST['sp_run_now'])) {
@@ -33,22 +32,22 @@ function sp_handle_admin_actions() {
         if ($result && $result['success']) {
             $message = array(
                 'type' => 'success',
-                'text' => "✅ Planification terminée ! {$result['processed']} articles traités."
+                'text' => "✅ Scheduling complete! {$result['processed']} posts processed."
             );
         } else {
             $message = array(
                 'type' => 'error',
-                'text' => "❌ Erreur lors de la planification : " . ($result['message'] ?? 'Erreur inconnue')
+                'text' => "❌ Error while scheduling: " . ($result['message'] ?? 'Unknown error')
             );
         }
     }
 
-    // Résultat du test manuel du WP-Cron (voir includes/heartbeat-monitor.php,
-    // action 'test_cron', qui redirige ici avec ces deux paramètres)
+    // Result of the manual WP-Cron test (see includes/heartbeat-monitor.php,
+    // 'test_cron' action, which redirects here with these two parameters)
     if (isset($_GET['test_result']) && isset($_GET['page']) && $_GET['page'] === 'scheduler-pro') {
         $message = array(
             'type' => $_GET['test_result'] === 'success' ? 'success' : 'error',
-            'text' => isset($_GET['test_message']) ? sanitize_text_field(wp_unslash($_GET['test_message'])) : 'Test terminé.',
+            'text' => isset($_GET['test_message']) ? sanitize_text_field(wp_unslash($_GET['test_message'])) : 'Test complete.',
         );
     }
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN : META BOX VERROUILLAGE PAR ARTICLE - Scheduler Pro v2.5
+ * ADMIN: PER-POST LOCK META BOX - Scheduler Pro v2.5
  */
 
 if (!defined('ABSPATH')) exit;
@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) exit;
 add_action('add_meta_boxes', function() {
     add_meta_box(
         'sp_lock_date_box',
-        '🔒 Scheduler Pro : Verrouillage',
+        '🔒 Scheduler Pro: Locking',
         'sp_render_lock_meta_box',
         'post',
         'side',
@@ -25,10 +25,10 @@ function sp_render_lock_meta_box($post) {
                name="sp_lock_planning"
                value="1"
                <?php checked($value, '1'); ?>>
-        <strong>Verrouiller la date de publication</strong>
+        <strong>Lock the publication date</strong>
     </label>
     <p class="description">
-        Empêche le Scheduler de modifier automatiquement la date de cet article.
+        Prevents the Scheduler from automatically changing this post's date.
     </p>
     <?php
 }

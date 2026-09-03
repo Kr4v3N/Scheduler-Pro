@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN : ONGLET MONITORING - Scheduler Pro v2.5
+ * ADMIN: MONITORING TAB - Scheduler Pro v2.5
  */
 
 if (!defined('ABSPATH')) exit;
@@ -10,19 +10,19 @@ function sp_render_monitoring_tab() {
     $next = SP_Heartbeat_Monitor::get_next_scheduled();
     $issues = SP_Heartbeat_Monitor::diagnose_issues();
 
-    // Stats de la queue
+    // Queue stats
     $queue_stats = array();
     if (class_exists('SP_Database_Manager')) {
         $queue_stats = SP_Database_Manager::get_stats();
     }
 
-    // Stats WordPress
+    // WordPress stats
     $total_future = (int) wp_count_posts()->future;
     $total_publish = (int) wp_count_posts()->publish;
 
     ?>
     <div class="sp-monitoring-grid">
-        <!-- Stats Globales -->
+        <!-- Global Stats -->
         <div class="sp-stats-row">
             <div class="sp-stat-card">
                 <div class="sp-stat-icon" style="background: #3b82f6;">
@@ -30,7 +30,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $total_future; ?></div>
-                    <div class="sp-stat-label">Articles Planifiés</div>
+                    <div class="sp-stat-label">Scheduled Posts</div>
                 </div>
             </div>
 
@@ -40,7 +40,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $total_publish; ?></div>
-                    <div class="sp-stat-label">Articles Publiés</div>
+                    <div class="sp-stat-label">Published Posts</div>
                 </div>
             </div>
 
@@ -51,7 +51,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $queue_stats['pending'] ?? 0; ?></div>
-                    <div class="sp-stat-label">Tâches en Attente</div>
+                    <div class="sp-stat-label">Pending Tasks</div>
                 </div>
             </div>
 
@@ -61,17 +61,17 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $queue_stats['failed'] ?? 0; ?></div>
-                    <div class="sp-stat-label">Tâches Échouées</div>
+                    <div class="sp-stat-label">Failed Tasks</div>
                 </div>
             </div>
             <?php endif; ?>
         </div>
 
-        <!-- État du Scheduler -->
+        <!-- Scheduler Status -->
         <div class="sp-card">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-heart"></span>
-                État du Scheduler
+                Scheduler Status
             </h2>
 
             <div class="sp-health-status sp-health-<?php echo $health['level']; ?>">
@@ -88,21 +88,21 @@ function sp_render_monitoring_tab() {
 
                     <?php if ($next): ?>
                         <p class="sp-next-run">
-                            <strong>Prochaine exécution :</strong>
+                            <strong>Next run:</strong>
                             <?php echo esc_html($next['date']); ?>
-                            (dans <?php echo esc_html($next['human']); ?>)
+                            (in <?php echo esc_html($next['human']); ?>)
                         </p>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        <!-- Problèmes Détectés -->
+        <!-- Issues Detected -->
         <?php if (!empty($issues)): ?>
         <div class="sp-card sp-card-warning">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-flag"></span>
-                Problèmes Détectés
+                Issues Detected
             </h2>
 
             <?php foreach ($issues as $issue): ?>
@@ -112,30 +112,30 @@ function sp_render_monitoring_tab() {
                     </div>
                     <div class="sp-issue-content">
                         <h4><?php echo esc_html($issue['message']); ?></h4>
-                        <p><strong>Solution :</strong> <?php echo esc_html($issue['solution']); ?></p>
+                        <p><strong>Solution:</strong> <?php echo esc_html($issue['solution']); ?></p>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
 
-        <!-- Distribution Articles -->
+        <!-- Post Distribution -->
         <?php sp_render_distribution_chart(); ?>
     </div>
     <?php
 }
 
 /**
- * Afficher le graphique de distribution
+ * Display the distribution chart
  */
 function sp_render_distribution_chart() {
     global $wpdb;
 
-    // Récupérer la distribution des 30 prochains jours
-    // IMPORTANT : comparer DATE(post_date) et non post_date brut à la borne
-    // supérieure — comparer un datetime (ex: "2026-10-03 14:23:07") à
-    // "2026-10-03 00:00:00" exclurait tous les articles du 30e jour publiés
-    // après minuit.
+    // Get the distribution for the next 30 days
+    // IMPORTANT: compare DATE(post_date), not raw post_date, against the
+    // upper bound — comparing a datetime (e.g. "2026-10-03 14:23:07") to
+    // "2026-10-03 00:00:00" would exclude every post on day 30 published
+    // after midnight.
     $distribution = $wpdb->get_results("
         SELECT DATE(post_date) as date, COUNT(*) as count
         FROM {$wpdb->posts}
@@ -158,7 +158,7 @@ function sp_render_distribution_chart() {
     <div class="sp-card">
         <h2 class="sp-card-title">
             <span class="dashicons dashicons-chart-bar"></span>
-            Distribution des 30 Prochains Jours
+            Distribution Over the Next 30 Days
         </h2>
 
         <div class="sp-distribution-chart">
@@ -167,7 +167,7 @@ function sp_render_distribution_chart() {
                 $percentage = ($day['count'] / $max_count) * 100;
                 $date_obj = new DateTime($day['date']);
                 ?>
-                <div class="sp-chart-bar" title="<?php echo $day['count']; ?> articles">
+                <div class="sp-chart-bar" title="<?php echo $day['count']; ?> posts">
                     <div class="sp-chart-bar-fill" style="height: <?php echo $percentage; ?>%;"></div>
                     <div class="sp-chart-bar-label">
                         <?php echo $date_obj->format('d/m'); ?>

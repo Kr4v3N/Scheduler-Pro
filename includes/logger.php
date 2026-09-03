@@ -2,11 +2,11 @@
 /**
  * LOGGER - Scheduler Pro v2.5
  *
- * Journal d'activité du plugin, avec rotation automatique. Le fichier
- * est stocké dans un répertoire dédié sous uploads/ (pas directement
- * dans wp-content/), protégé par un .htaccess + un index.php vide pour
- * empêcher l'accès HTTP direct (auparavant le log vivait en clair à la
- * racine de wp-content/, potentiellement accessible en HTTP).
+ * Plugin activity log, with automatic rotation. The file is stored in a
+ * dedicated directory under uploads/ (not directly in wp-content/),
+ * protected by a .htaccess + an empty index.php to block direct HTTP
+ * access (the log used to live in plain sight at the root of
+ * wp-content/, potentially reachable over HTTP).
  */
 
 if (!defined('ABSPATH')) exit;
@@ -50,12 +50,12 @@ if (!function_exists('sp_rotate_log_file')) {
         if (!file_exists($log_file)) return;
 
         $file_size = filesize($log_file);
-        if ($file_size > 1048576) { // 1 Mo
+        if ($file_size > 1048576) { // 1 MB
             $lines = file($log_file);
             if (count($lines) > 500) {
                 $lines = array_slice($lines, -500);
                 @file_put_contents($log_file, implode('', $lines), LOCK_EX);
-                sp_log("🔄 Rotation du fichier log effectuée", 'SYSTEM');
+                sp_log("🔄 Log file rotated", 'SYSTEM');
             }
         }
     }

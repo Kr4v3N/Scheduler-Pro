@@ -2,10 +2,10 @@
 /**
  * MEMORY GUARD - Scheduler Pro v2.5
  *
- * Utilitaires de gestion mémoire, partagés entre le moteur de
- * planification (engine.php) et le diagnostic (heartbeat-monitor.php),
- * qui avait auparavant sa propre conversion d'unité incorrecte (ne gérait
- * pas le suffixe "G").
+ * Memory management utilities, shared between the scheduling engine
+ * (engine.php) and the diagnostics (heartbeat-monitor.php), which used
+ * to have its own incorrect unit conversion (didn't handle the "G"
+ * suffix).
  */
 
 if (!defined('ABSPATH')) exit;
@@ -18,7 +18,7 @@ if (!function_exists('sp_check_memory_available')) {
         $usage_percent = ($current_usage / $memory_limit_bytes) * 100;
 
         if ($usage_percent > 80) {
-            sp_log("⚠️ ALERTE MÉMOIRE : {$usage_percent}% utilisée", 'WARNING');
+            sp_log("⚠️ MEMORY ALERT: {$usage_percent}% used", 'WARNING');
             return false;
         }
         return true;

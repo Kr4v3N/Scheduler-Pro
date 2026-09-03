@@ -1,10 +1,10 @@
 <?php
 /**
- * ADMIN : MENU & PAGE PRINCIPALE - Scheduler Pro v2.5
+ * ADMIN: MENU & MAIN PAGE - Scheduler Pro v2.5
  *
- * Enregistrement du menu, coquille de la page (header, onglets) et
- * routage vers le bon onglet. Le rendu de chaque onglet vit dans son
- * propre fichier (tab-*.php de ce même répertoire).
+ * Menu registration, page shell (header, tabs) and routing to the right
+ * tab. Each tab's rendering lives in its own file (tab-*.php in this
+ * same directory).
  */
 
 if (!defined('ABSPATH')) exit;
@@ -23,7 +23,7 @@ add_action('admin_menu', function() {
 
 function sp_admin_page_render() {
     if (!current_user_can('manage_options')) {
-        wp_die('Accès refusé');
+        wp_die('Access denied');
     }
 
     $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'settings';
@@ -42,12 +42,12 @@ function sp_admin_page_render() {
             <?php if (SP_Heartbeat_Monitor::check_wp_cron_health()['level'] === 'success'): ?>
                 <div class="sp-status-badge sp-status-ok">
                     <span class="dashicons dashicons-yes-alt"></span>
-                    Scheduler Opérationnel
+                    Scheduler Running
                 </div>
             <?php else: ?>
                 <div class="sp-status-badge sp-status-error">
                     <span class="dashicons dashicons-warning"></span>
-                    Problème Détecté
+                    Issue Detected
                 </div>
             <?php endif; ?>
         </div>
@@ -62,7 +62,7 @@ function sp_admin_page_render() {
             <a href="?page=scheduler-pro&tab=settings"
                class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-admin-settings"></span>
-                Réglages
+                Settings
             </a>
             <a href="?page=scheduler-pro&tab=monitoring"
                class="nav-tab <?php echo $active_tab === 'monitoring' ? 'nav-tab-active' : ''; ?>">
@@ -72,12 +72,12 @@ function sp_admin_page_render() {
             <a href="?page=scheduler-pro&tab=logs"
                class="nav-tab <?php echo $active_tab === 'logs' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-media-text"></span>
-                Journal d'Activité
+                Activity Log
             </a>
             <a href="?page=scheduler-pro&tab=about"
                class="nav-tab <?php echo $active_tab === 'about' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-info"></span>
-                À Propos
+                About
             </a>
         </nav>
 

@@ -2,114 +2,117 @@
 /**
  * ENGINE - Scheduler Pro v2.5
  *
- * Moteur de planification. Dépend de :
- * - includes/memory-guard.php (vérification mémoire)
+ * Scheduling engine. Depends on:
+ * - includes/memory-guard.php (memory check)
  * - includes/logger.php (sp_log)
- * - includes/lock-manager.php (verrouillage anti-concurrence)
- * - includes/slot-finder.php (recherche de créneau, mode Adhésif)
- * - includes/human-time-generator.php (génération d'heure humaine)
- * - includes/database-manager.php (traçabilité, optionnelle)
+ * - includes/lock-manager.php (anti-concurrency locking)
+ * - includes/slot-finder.php (slot search, Adhesive mode)
+ * - includes/human-time-generator.php (human time generation)
+ * - includes/database-manager.php (traceability, optional)
  *
- * Ces fichiers doivent être chargés AVANT celui-ci (voir
- * sp_load_core_files() dans scheduler-pro.php, qui définit l'ordre).
+ * These files must be loaded BEFORE this one (see sp_load_core_files()
+ * in scheduler-pro.php, which defines the order).
  *
- * IMPORTANT : Ce moteur ne traite QUE les articles avec post_status = 'future'
+ * IMPORTANT: This engine ONLY processes posts with post_status = 'future'
  */
 
 if (!defined('ABSPATH')) exit;
 
 /**
- * 🚀 MOTEUR DE PLANIFICATION PRINCIPAL
+ * 🚀 MAIN SCHEDULING ENGINE
  *
- * IMPORTANT : Ne traite QUE les articles avec post_status = 'future'
+ * IMPORTANT: Only processes posts with post_status = 'future'
  */
 if (!function_exists('sp_process_scheduling')) {
     function sp_process_scheduling() {
-        // === ÉTAPE 1 : ACQUISITION DU VERROU ===
+        // === STEP 1: ACQUIRE THE LOCK ===
         if (!SP_Lock_Manager::acquire('main_scheduling', 600)) {
-            sp_log("❌ Une planification est déjà en cours - abandon", 'ERROR');
+            sp_log("❌ A scheduling run is already in progress - aborting", 'ERROR');
             return array(
                 'success' => false,
-                'message' => 'Une planification est déjà en cours',
+                'message' => 'A scheduling run is already in progress',
                 'processed' => 0
             );
         }
 
         try {
-            sp_log("=== DÉBUT DE LA PLANIFICATION (Articles FUTURS uniquement) ===", 'INFO');
+            sp_log("=== STARTING SCHEDULING (FUTURE posts only) ===", 'INFO');
 
-            // === ÉTAPE 2 : RÉCUPÉRATION DES PARAMÈTRES ===
+            // === STEP 2: RETRIEVE SETTINGS ===
             $posts_per_day = max(1, (int) get_option('sp_posts_per_day', 3));
             $start_hour    = max(0, min(23, (int) get_option('sp_start_hour', 7)));
             $end_hour      = max(0, min(23, (int) get_option('sp_end_hour', 20)));
             $force_replan  = get_option('sp_force_replan', '0');
 
             if ($start_hour >= $end_hour) {
-                sp_log("⚠️ Configuration invalide : start_hour >= end_hour - correction automatique", 'WARNING');
+                sp_log("⚠️ Invalid configuration: start_hour >= end_hour - auto-correcting", 'WARNING');
                 $start_hour = 7;
                 $end_hour = 20;
             }
 
-            sp_log("Réglages : {$posts_per_day} art/jour | Plage : {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'OUI' : 'NON'), 'INFO');
+            sp_log("Settings: {$posts_per_day} posts/day | Range: {$start_hour}h-{$end_hour}h | Force: " . ($force_replan === '1' ? 'YES' : 'NO'), 'INFO');
 
-            // === ÉTAPE 3 : DÉTERMINATION DU POINT DE DÉPART ===
+            // === STEP 3: DETERMINE THE STARTING POINT ===
             if ($force_replan === '1') {
                 $tomorrow = date('Y-m-d', strtotime('+1 day', current_time('timestamp')));
                 $current_date = $tomorrow;
                 $count_in_day = 0;
 
-                sp_log("🧹 Mode 'Grand Ménage' activé : Réorganisation totale depuis {$tomorrow}", 'INFO');
+                sp_log("🧹 'Full Reset' mode enabled: Full reorganization starting {$tomorrow}", 'INFO');
 
             } else {
                 $slot = sp_get_next_available_slot($posts_per_day);
                 $current_date = $slot['date'];
                 $count_in_day = $slot['count'];
 
-                sp_log("📌 Mode 'Adhésif' activé : Reprise sur {$current_date} avec {$count_in_day} article(s) déjà présent(s)", 'INFO');
+                sp_log("📌 'Adhesive' mode enabled: Resuming on {$current_date} with {$count_in_day} post(s) already present", 'INFO');
             }
 
-            // === ÉTAPE 4 : CONSTRUCTION DE LA REQUÊTE ===
-            // IMPORTANT : SEULEMENT post_status = 'future'
+            // === STEP 4: BUILD THE QUERY ===
+            // IMPORTANT: ONLY post_status = 'future'
             $base_args = array(
-                'post_status'    => 'future', // ✅ UNIQUEMENT LES ARTICLES PLANIFIÉS
+                'post_status'    => 'future', // ✅ ONLY SCHEDULED POSTS
                 'post_type'      => 'post',
                 'order'          => 'ASC',
                 'fields'         => 'ids',
             );
 
-            // Exclusion des articles verrouillés directement dans la requête (dans les
-            // deux modes) : évite de gaspiller une place de lot sur un article qui sera
-            // de toute façon ignoré (auparavant filtré après coup, en PHP, dans la boucle).
+            // Exclude locked posts directly in the query (in both modes): avoids
+            // wasting a batch slot on a post that would be ignored anyway
+            // (previously filtered afterward, in PHP, inside the loop).
             $lock_exclusion = array(
                 'relation' => 'OR',
                 array('key' => '_sp_lock_planning', 'compare' => 'NOT EXISTS'),
                 array('key' => '_sp_lock_planning', 'value' => '1', 'compare' => '!='),
             );
 
-            // IMPORTANT : en mode Adhésif, chaque article traité sort du résultat de la
-            // requête suivante (sa meta _is_smart_scheduled passe à '1', qui est exclue
-            // par le meta_query ci-dessous) : le nombre total d'articles correspondants
-            // RÉTRÉCIT donc à chaque lot. Paginer par offset dans ce cas sauterait un bloc
-            // entier d'articles (l'offset avance plus vite que le jeu de résultats ne
-            // rétrécit). On garde donc systématiquement offset=0 en mode Adhésif : la
-            // requête ramène toujours le "prochain" lot d'articles encore éligibles, et on
-            // s'arrête dès qu'un lot incomplet (ou vide) est retourné.
+            // IMPORTANT: in Adhesive mode, every processed post drops out of the
+            // next query's result set (its _is_smart_scheduled meta becomes '1',
+            // which is excluded by the meta_query below): the total number of
+            // matching posts therefore SHRINKS with every batch. Paginating by
+            // offset in that case would skip an entire block of posts (the offset
+            // advances faster than the result set shrinks). So offset stays at 0
+            // at all times in Adhesive mode: the query always returns the "next"
+            // batch of still-eligible posts, and we stop as soon as an incomplete
+            // (or empty) batch is returned.
             //
-            // En mode Grand Ménage, le filtre _is_smart_scheduled n'est PAS appliqué (tous
-            // les articles futurs non verrouillés restent éligibles même après traitement) :
-            // le jeu de résultats NE rétrécit PAS d'un lot à l'autre, l'offset reste donc
-            // nécessaire pour avancer dans la liste sans reboucler sur les mêmes articles.
+            // In Full Reset mode, the _is_smart_scheduled filter is NOT applied
+            // (all non-locked future posts remain eligible even after being
+            // processed): the result set does NOT shrink from one batch to the
+            // next, so the offset is still needed to move through the list
+            // without looping back over the same posts.
             $use_offset = ($force_replan === '1');
 
-            // Le mode Grand Ménage pagine par offset PENDANT que la boucle réécrit
-            // post_date (via wp_update_post() plus bas) - trier par date rendrait cette
-            // pagination instable : un article déjà traité, une fois sa nouvelle date
-            // appliquée, peut se retrouver positionné avant ou après des articles pas
-            // encore traités, décalant "position 100" d'une requête à l'autre et faisant
-            // sauter ou retraiter des articles. Trier par ID (immuable pendant
-            // l'exécution) garde cette pagination fiable. Le mode Adhésif n'utilise pas
-            // l'offset (cf. ci-dessus) donc n'a pas ce problème : on y garde le tri
-            // chronologique par date, plus logique pour l'utilisateur.
+            // Full Reset mode paginates by offset WHILE the loop rewrites post_date
+            // (via wp_update_post() below) - sorting by date would make that
+            // pagination unstable: a post already processed, once its new date is
+            // applied, can end up positioned before or after posts not yet
+            // processed, shifting "position 100" from one query to the next and
+            // causing posts to be skipped or reprocessed. Sorting by ID (immutable
+            // during execution) keeps that pagination reliable. Adhesive mode
+            // doesn't use the offset (see above) so it doesn't have this problem:
+            // it keeps the chronological sort by date, which makes more sense to
+            // the user.
             $base_args['orderby'] = $use_offset ? 'ID' : 'date';
 
             if (!$use_offset) {
@@ -126,7 +129,7 @@ if (!function_exists('sp_process_scheduling')) {
                 $base_args['meta_query'] = array($lock_exclusion);
             }
 
-            // === ÉTAPE 5 : TRAITEMENT PAR LOTS ===
+            // === STEP 5: BATCH PROCESSING ===
             $batch_size = 100;
             $offset = 0;
             $total_processed = 0;
@@ -134,20 +137,20 @@ if (!function_exists('sp_process_scheduling')) {
             $completed_fully = true;
 
             do {
-                // Vérifier la mémoire
+                // Check memory
                 if (!sp_check_memory_available()) {
-                    sp_log("⚠️ Mémoire critique - arrêt temporaire après {$total_processed} articles", 'WARNING');
+                    sp_log("⚠️ Critical memory - pausing after {$total_processed} posts", 'WARNING');
                     $completed_fully = false;
                     break;
                 }
 
-                // Construire les arguments du lot
+                // Build the batch arguments
                 $args = array_merge($base_args, array(
                     'posts_per_page' => $batch_size,
                     'offset'         => $use_offset ? $offset : 0,
                 ));
 
-                // Exécuter la requête
+                // Run the query
                 $query = new WP_Query($args);
                 $post_ids = $query->posts;
 
@@ -155,28 +158,28 @@ if (!function_exists('sp_process_scheduling')) {
                     break;
                 }
 
-                sp_log("📦 Lot #{$batch_number} : " . count($post_ids) . " articles FUTURS à traiter", 'INFO');
+                sp_log("📦 Batch #{$batch_number}: " . count($post_ids) . " FUTURE posts to process", 'INFO');
 
-                // Utilisé après la boucle pour détecter un lot entièrement en échec
-                // (voir garde-fou anti-boucle-infinie plus bas)
+                // Used after the loop to detect a fully-failed batch
+                // (see anti-infinite-loop guard below)
                 $total_processed_before_batch = $total_processed;
 
-                // === ÉTAPE 6 : TRAITEMENT DES ARTICLES ===
-                // (les articles verrouillés sont déjà exclus par la requête, cf. ÉTAPE 4)
+                // === STEP 6: PROCESS THE POSTS ===
+                // (locked posts are already excluded by the query, see STEP 4)
                 foreach ($post_ids as $post_id) {
-                    // Vérifier si la journée est pleine
+                    // Check whether the day is full
                     if ($count_in_day >= $posts_per_day) {
                         $next_slot = sp_find_next_available_day($current_date, $posts_per_day);
                         $current_date = $next_slot['date'];
                         $count_in_day = $next_slot['count'];
 
-                        sp_log("📅 Passage au jour suivant : {$current_date} (déjà {$count_in_day} article(s))", 'INFO');
+                        sp_log("📅 Moving to the next day: {$current_date} ({$count_in_day} post(s) already there)", 'INFO');
                     }
 
-                    // ✨ Générer une date ultra-humaine pour la position à venir.
-                    // Le compteur n'est incrémenté qu'après confirmation du succès de
-                    // wp_update_post() (plus bas), pour ne pas "consommer" un créneau
-                    // en cas d'échec de mise à jour.
+                    // ✨ Generate an ultra-human date for the upcoming slot.
+                    // The counter is only incremented after wp_update_post()
+                    // succeeds (below), so a failed update doesn't "consume" a
+                    // slot.
                     $new_date = SP_Human_Time_Generator::generate(
                         $current_date,
                         $count_in_day + 1,
@@ -185,7 +188,7 @@ if (!function_exists('sp_process_scheduling')) {
                         $end_hour
                     );
 
-                    // Mettre à jour l'article
+                    // Update the post
                     $updated_id = wp_update_post(array(
                         'ID'            => $post_id,
                         'post_date'     => $new_date,
@@ -194,43 +197,44 @@ if (!function_exists('sp_process_scheduling')) {
                     ), true);
 
                     if (is_wp_error($updated_id)) {
-                        sp_log("❌ ERREUR : Article ID {$post_id} - " . $updated_id->get_error_message(), 'ERROR');
+                        sp_log("❌ ERROR: Post ID {$post_id} - " . $updated_id->get_error_message(), 'ERROR');
                         continue;
                     }
 
-                    // Le créneau est confirmé occupé : on incrémente maintenant seulement
+                    // The slot is now confirmed occupied: increment only now
                     $count_in_day++;
 
-                    // Marquer comme planifié
+                    // Mark as scheduled
                     update_post_meta($post_id, '_is_smart_scheduled', '1');
 
-                    sp_log("✅ Article ID {$post_id} → {$new_date}", 'SUCCESS');
+                    sp_log("✅ Post ID {$post_id} → {$new_date}", 'SUCCESS');
                     $total_processed++;
 
-                    // Optionnel : Ajouter à la table de queue
+                    // Optional: add to the queue table
                     if (class_exists('SP_Database_Manager')) {
                         SP_Database_Manager::add_task(
                             $post_id,
                             $new_date,
-                            50, // Priorité normale
+                            50, // Normal priority
                             array('batch' => $batch_number)
                         );
                     }
                 }
 
-                // Garde-fou anti-boucle-infinie : en mode Adhésif, offset reste à 0 en
-                // permanence (voir plus haut). Si un lot COMPLET (100 résultats) ne produit
-                // AUCUN succès (ex: un autre plugin bloque wp_update_post() sur tous ces
-                // articles via son propre hook save_post), aucun d'eux ne reçoit
-                // _is_smart_scheduled : ils réapparaîtraient à l'identique au lot suivant,
-                // indéfiniment. sp_process_scheduling() tourne en synchrone dans une
-                // requête HTTP (bouton "Lancer maintenant", test du cron, pseudo-cron WP) :
-                // une boucle infinie finirait par heurter max_execution_time, tuant le
-                // process SANS passer par le bloc finally qui libère le verrou - le
-                // bloquant jusqu'à son propre timeout. On s'arrête donc explicitement
-                // plutôt que de laisser cette situation se produire.
+                // Anti-infinite-loop guard: in Adhesive mode, the offset stays at 0
+                // permanently (see above). If a COMPLETE batch (100 results)
+                // produces NO success at all (e.g. another plugin blocks
+                // wp_update_post() on all of these posts via its own save_post
+                // hook), none of them receive _is_smart_scheduled: they would
+                // reappear identically in the next batch, indefinitely.
+                // sp_process_scheduling() runs synchronously within an HTTP
+                // request ("Run Now" button, cron test, WP pseudo-cron): an
+                // infinite loop would eventually hit max_execution_time, killing
+                // the process WITHOUT going through the finally block that
+                // releases the lock - blocking it until its own timeout. So we
+                // stop explicitly instead of letting that situation happen.
                 if (!$use_offset && count($post_ids) === $batch_size && $total_processed === $total_processed_before_batch) {
-                    sp_log("❌ ERREUR : lot #{$batch_number} entièrement en échec (0 succès sur {$batch_size}) - arrêt pour éviter une boucle infinie. Vérifiez si un plugin tiers bloque wp_update_post() sur ces articles.", 'ERROR');
+                    sp_log("❌ ERROR: batch #{$batch_number} failed entirely (0 successes out of {$batch_size}) - stopping to avoid an infinite loop. Check whether a third-party plugin is blocking wp_update_post() on these posts.", 'ERROR');
                     $completed_fully = false;
                     break;
                 }
@@ -241,47 +245,47 @@ if (!function_exists('sp_process_scheduling')) {
                     $offset += $batch_size;
                 }
 
-                // Petit délai entre chaque lot, tant qu'il en reste potentiellement d'autres
+                // Small delay between batches, as long as more may remain
                 $has_more = $use_offset ? ($query->found_posts > $offset) : (count($post_ids) === $batch_size);
                 if ($has_more) {
-                    usleep(100000); // 0.1 seconde
+                    usleep(100000); // 0.1 second
                 }
 
             } while ($use_offset ? ($query->found_posts > $offset) : (count($post_ids) === $batch_size));
 
-            // === ÉTAPE 7 : FINALISATION ===
+            // === STEP 7: WRAP-UP ===
 
-            // Désactiver le mode force_replan UNIQUEMENT si le traitement est allé à son
-            // terme naturel (jeu de résultats épuisé). S'il s'est arrêté prématurément
-            // (mémoire critique), on le laisse actif : sinon la réorganisation serait
-            // déclarée terminée alors qu'il reste des articles non traités.
+            // Only disable Full Reset mode if processing ran to its natural
+            // conclusion (result set exhausted). If it stopped prematurely
+            // (critical memory), leave it enabled: otherwise the reorganization
+            // would be declared complete while posts remain unprocessed.
             if ($force_replan === '1') {
                 if ($completed_fully) {
                     update_option('sp_force_replan', '0');
-                    sp_log("🔄 Mode 'Grand Ménage' désactivé automatiquement (traitement complet)", 'INFO');
+                    sp_log("🔄 'Full Reset' mode automatically disabled (processing complete)", 'INFO');
                 } else {
-                    sp_log("⚠️ Mode 'Grand Ménage' laissé actif : le traitement s'est arrêté prématurément (mémoire). Relancez la planification pour terminer.", 'WARNING');
+                    sp_log("⚠️ 'Full Reset' mode left enabled: processing stopped prematurely (memory). Re-run the scheduler to finish.", 'WARNING');
                 }
             }
 
             // Heartbeat
             update_option('sp_last_cron_run', time());
 
-            sp_log("=== FIN DE LA PLANIFICATION : {$total_processed} articles FUTURS traités ===", 'SUCCESS');
+            sp_log("=== SCHEDULING FINISHED: {$total_processed} FUTURE posts processed ===", 'SUCCESS');
 
             return array(
                 'success' => true,
-                'message' => "{$total_processed} articles planifiés avec succès",
+                'message' => "{$total_processed} posts successfully scheduled",
                 'processed' => $total_processed
             );
 
         } catch (Exception $e) {
-            sp_log("❌ ERREUR CRITIQUE : " . $e->getMessage(), 'ERROR');
-            sp_log("Stack trace : " . $e->getTraceAsString(), 'DEBUG');
+            sp_log("❌ CRITICAL ERROR: " . $e->getMessage(), 'ERROR');
+            sp_log("Stack trace: " . $e->getTraceAsString(), 'DEBUG');
 
             return array(
                 'success' => false,
-                'message' => 'Erreur : ' . $e->getMessage(),
+                'message' => 'Error: ' . $e->getMessage(),
                 'processed' => 0
             );
 

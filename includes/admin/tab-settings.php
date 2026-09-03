@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN : ONGLET RÉGLAGES - Scheduler Pro v2.5
+ * ADMIN: SETTINGS TAB - Scheduler Pro v2.5
  */
 
 if (!defined('ABSPATH')) exit;
@@ -15,25 +15,25 @@ function sp_render_settings_tab() {
 
     ?>
     <div class="sp-settings-grid">
-        <!-- Colonne Gauche : Réglages -->
+        <!-- Left Column: Settings -->
         <div class="sp-col-main">
             <form method="post">
                 <?php wp_nonce_field('sp_settings_nonce'); ?>
 
-                <!-- Card : Simulateur -->
+                <!-- Card: Simulator -->
                 <div class="sp-card">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-calculator"></span>
-                        Simulateur de Stratégie
+                        Strategy Simulator
                     </h2>
 
                     <div class="sp-info-box">
-                        <strong><?php echo $total_future; ?></strong> articles en attente de planification
+                        <strong><?php echo $total_future; ?></strong> posts awaiting scheduling
                     </div>
 
                     <div class="sp-simulator">
                         <div class="sp-sim-input">
-                            <label>Articles / jour</label>
+                            <label>Posts / day</label>
                             <input type="number"
                                    id="sp_posts_per_day"
                                    name="sp_posts_per_day"
@@ -48,7 +48,7 @@ function sp_render_settings_tab() {
                         </div>
 
                         <div class="sp-sim-output">
-                            <label>Durée (Jours)</label>
+                            <label>Duration (Days)</label>
                             <input type="number"
                                    id="sp_duration_input"
                                    value="<?php echo ceil($total_future / max(1, $posts_per_day)); ?>"
@@ -60,25 +60,25 @@ function sp_render_settings_tab() {
                     <p class="sp-sim-result" id="sp-summary-text"></p>
                 </div>
 
-                <!-- Card : Horaires -->
+                <!-- Card: Schedule -->
                 <div class="sp-card">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-clock"></span>
-                        Configuration des Horaires
+                        Schedule Configuration
                     </h2>
 
                     <div class="sp-form-row">
                         <div class="sp-form-col">
-                            <label class="sp-label">Plage horaire de publication</label>
+                            <label class="sp-label">Publishing time range</label>
                             <div class="sp-time-range">
-                                <span>De</span>
+                                <span>From</span>
                                 <input type="number"
                                        name="sp_start_hour"
                                        value="<?php echo $start_hour; ?>"
                                        min="0"
                                        max="23"
                                        class="sp-input-time">
-                                <span>h à</span>
+                                <span>h to</span>
                                 <input type="number"
                                        name="sp_end_hour"
                                        value="<?php echo $end_hour; ?>"
@@ -88,31 +88,31 @@ function sp_render_settings_tab() {
                                 <span>h</span>
                             </div>
                             <p class="sp-help-text">
-                                Recommandé : 7h-20h pour une activité naturelle
+                                Recommended: 7am-8pm for natural-looking activity
                             </p>
                         </div>
 
                         <div class="sp-form-col">
-                            <label class="sp-label">Automatisation</label>
+                            <label class="sp-label">Automation</label>
                             <label class="sp-checkbox-label">
                                 <input type="checkbox"
                                        name="sp_auto_mode"
                                        value="1"
                                        <?php checked($auto_mode, '1'); ?>>
-                                <span>Activer la planification quotidienne automatique</span>
+                                <span>Enable automatic daily scheduling</span>
                             </label>
                             <p class="sp-help-text">
-                                Exécution quotidienne à 00:30 via WP-Cron
+                                Runs daily at 00:30 via WP-Cron
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card : Mode Grand Ménage -->
+                <!-- Card: Full Reset Mode -->
                 <div class="sp-card sp-card-warning">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-image-rotate"></span>
-                        Mode "Grand Ménage"
+                        "Full Reset" Mode
                     </h2>
 
                     <label class="sp-checkbox-label">
@@ -120,12 +120,12 @@ function sp_render_settings_tab() {
                                name="sp_force_replan"
                                value="1"
                                <?php checked($force_replan, '1'); ?>>
-                        <strong>Forcer la réorganisation de TOUS les articles futurs</strong>
+                        <strong>Force reorganization of ALL future posts</strong>
                     </label>
 
                     <p class="sp-help-text">
-                        ⚠️ <strong>Attention :</strong> Cette option réorganisera TOUS vos articles futurs depuis demain.
-                        Les dates actuelles seront écrasées. Se désactive automatiquement après exécution.
+                        ⚠️ <strong>Warning:</strong> This option will reorganize ALL your future posts starting tomorrow.
+                        Current dates will be overwritten. Automatically disables itself after running.
                     </p>
                 </div>
 
@@ -134,64 +134,64 @@ function sp_render_settings_tab() {
                             name="sp_save_settings"
                             class="button button-primary button-hero">
                         <span class="dashicons dashicons-saved"></span>
-                        Sauvegarder les Réglages
+                        Save Settings
                     </button>
                 </div>
             </form>
 
-            <!-- Action Manuelle -->
+            <!-- Manual Action -->
             <form method="post">
                 <?php wp_nonce_field('sp_run_nonce'); ?>
                 <div class="sp-card sp-card-action">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-controls-play"></span>
-                        Exécution Manuelle
+                        Manual Run
                     </h2>
-                    <p>Lancer immédiatement la planification des articles (ne pas attendre le cron quotidien)</p>
+                    <p>Run the post scheduling immediately (without waiting for the daily cron)</p>
                     <button type="submit"
                             name="sp_run_now"
                             class="button button-hero sp-btn-action">
-                        🚀 Lancer la Planification Maintenant
+                        🚀 Run Scheduling Now
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Colonne Droite : État du Système -->
+        <!-- Right Column: System Status -->
         <div class="sp-col-sidebar">
             <?php SP_Heartbeat_Monitor::render_inline_status(); ?>
 
             <!-- Quick Stats -->
             <div class="sp-card sp-card-stats">
-                <h3>📊 Statistiques Rapides</h3>
+                <h3>📊 Quick Stats</h3>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Articles futurs</span>
+                    <span class="sp-stat-label">Future posts</span>
                     <span class="sp-stat-value"><?php echo $total_future; ?></span>
                 </div>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Articles/jour</span>
+                    <span class="sp-stat-label">Posts/day</span>
                     <span class="sp-stat-value"><?php echo $posts_per_day; ?></span>
                 </div>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Durée estimée</span>
+                    <span class="sp-stat-label">Estimated duration</span>
                     <span class="sp-stat-value">
-                        <?php echo ceil($total_future / max(1, $posts_per_day)); ?> jours
+                        <?php echo ceil($total_future / max(1, $posts_per_day)); ?> days
                     </span>
                 </div>
             </div>
 
-            <!-- Aide Rapide -->
+            <!-- Quick Help -->
             <div class="sp-card sp-card-help">
-                <h3>💡 Aide Rapide</h3>
+                <h3>💡 Quick Help</h3>
                 <ul class="sp-help-list">
                     <li>
-                        <strong>Mode Adhésif :</strong> Les nouveaux articles sont ajoutés à la suite
+                        <strong>Adhesive Mode:</strong> New posts are added after the existing schedule
                     </li>
                     <li>
-                        <strong>Mode Grand Ménage :</strong> Tout est réorganisé depuis demain
+                        <strong>Full Reset Mode:</strong> Everything is reorganized starting tomorrow
                     </li>
                     <li>
-                        <strong>Verrouillage :</strong> Utilisez la meta box sur chaque article pour bloquer sa date
+                        <strong>Locking:</strong> Use the meta box on each post to lock its date
                     </li>
                 </ul>
             </div>
@@ -211,8 +211,8 @@ function sp_render_settings_tab() {
             date.setDate(date.getDate() + days);
 
             $summary.html(`
-                <strong>Action :</strong> ${$perDay.val()} articles/jour jusqu'au
-                <strong>${date.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})}</strong>
+                <strong>Result:</strong> ${$perDay.val()} posts/day until
+                <strong>${date.toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'})}</strong>
             `);
         }
 

@@ -2,17 +2,17 @@
 /**
  * SLOT FINDER - Scheduler Pro v2.5
  *
- * Recherche du prochain créneau disponible (jour + position) pour le
- * mode Adhésif de sp_process_scheduling(). Ne compte que les articles
- * post_status = 'future', non verrouillés (_sp_lock_planning != '1').
+ * Finds the next available slot (day + position) for the Adhesive mode
+ * of sp_process_scheduling(). Only counts posts with post_status =
+ * 'future', not locked (_sp_lock_planning != '1').
  */
 
 if (!defined('ABSPATH')) exit;
 
 /**
- * COMPTER LES ARTICLES NON-VERROUILLÉS SUR UNE DATE
+ * COUNT NON-LOCKED POSTS ON A GIVEN DATE
  *
- * IMPORTANT : Ne compte QUE les articles avec post_status = 'future'
+ * IMPORTANT: Only counts posts with post_status = 'future'
  */
 if (!function_exists('sp_count_non_locked_posts_on_date')) {
     function sp_count_non_locked_posts_on_date($date) {
@@ -33,7 +33,7 @@ if (!function_exists('sp_count_non_locked_posts_on_date')) {
 }
 
 /**
- * TROUVER LE PROCHAIN CRÉNEAU DISPONIBLE
+ * FIND THE NEXT AVAILABLE SLOT
  */
 if (!function_exists('sp_get_next_available_slot')) {
     function sp_get_next_available_slot($posts_per_day) {
@@ -48,7 +48,7 @@ if (!function_exists('sp_get_next_available_slot')) {
 
         if (!$last_date) {
             $start_date = date('Y-m-d', strtotime('+1 day', current_time('timestamp')));
-            sp_log("📅 Aucun article FUTUR trouvé → Démarrage le {$start_date}", 'INFO');
+            sp_log("📅 No FUTURE post found → Starting on {$start_date}", 'INFO');
 
             return array(
                 'date' => $start_date,
@@ -59,19 +59,19 @@ if (!function_exists('sp_get_next_available_slot')) {
         $tomorrow = date('Y-m-d', strtotime('+1 day', current_time('timestamp')));
 
         if ($last_date < $tomorrow) {
-            sp_log("📅 Dernière date ({$last_date}) <= aujourd'hui → Démarrage demain ({$tomorrow})", 'INFO');
+            sp_log("📅 Last date ({$last_date}) <= today → Starting tomorrow ({$tomorrow})", 'INFO');
             $last_date = $tomorrow;
         }
 
         $count = sp_count_non_locked_posts_on_date($last_date);
 
-        sp_log("📊 Date de reprise : {$last_date} ({$count}/{$posts_per_day} articles FUTURS non verrouillés)", 'INFO');
+        sp_log("📊 Resume date: {$last_date} ({$count}/{$posts_per_day} non-locked FUTURE posts)", 'INFO');
 
         while ($count >= $posts_per_day) {
             $last_date = date('Y-m-d', strtotime("+1 day", strtotime($last_date)));
             $count = sp_count_non_locked_posts_on_date($last_date);
 
-            sp_log("📅 Journée pleine → Passage au {$last_date} ({$count}/{$posts_per_day} articles)", 'INFO');
+            sp_log("📅 Day full → Moving to {$last_date} ({$count}/{$posts_per_day} posts)", 'INFO');
         }
 
         return array(
@@ -82,7 +82,7 @@ if (!function_exists('sp_get_next_available_slot')) {
 }
 
 /**
- * TROUVER LE PROCHAIN JOUR DISPONIBLE (avec saut automatique)
+ * FIND THE NEXT AVAILABLE DAY (with automatic skipping)
  */
 if (!function_exists('sp_find_next_available_day')) {
     function sp_find_next_available_day($current_date, $posts_per_day) {
@@ -93,14 +93,14 @@ if (!function_exists('sp_find_next_available_day')) {
         $iterations = 0;
 
         while ($count >= $posts_per_day && $iterations < $max_iterations) {
-            sp_log("⏭️ Jour {$next_date} déjà plein ({$count}/{$posts_per_day}) → Passage au suivant", 'INFO');
+            sp_log("⏭️ Day {$next_date} already full ({$count}/{$posts_per_day}) → Moving to the next one", 'INFO');
             $next_date = date('Y-m-d', strtotime("+1 day", strtotime($next_date)));
             $count = sp_count_non_locked_posts_on_date($next_date);
             $iterations++;
         }
 
         if ($iterations >= $max_iterations) {
-            sp_log("❌ ERREUR : Impossible de trouver un jour disponible après {$max_iterations} tentatives", 'ERROR');
+            sp_log("❌ ERROR: Could not find an available day after {$max_iterations} attempts", 'ERROR');
         }
 
         return array(

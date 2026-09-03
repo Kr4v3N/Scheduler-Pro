@@ -1,6 +1,6 @@
 <?php
 /**
- * ADMIN : ONGLET JOURNAL D'ACTIVITÉ - Scheduler Pro v2.5
+ * ADMIN: ACTIVITY LOG TAB - Scheduler Pro v2.5
  */
 
 if (!defined('ABSPATH')) exit;
@@ -11,7 +11,7 @@ function sp_render_logs_tab() {
 
     if (file_exists($log_path)) {
         $logs = array_reverse(file($log_path));
-        $logs = array_slice($logs, 0, 200); // Limiter à 200 lignes
+        $logs = array_slice($logs, 0, 200); // Limit to 200 lines
     }
 
     ?>
@@ -19,7 +19,7 @@ function sp_render_logs_tab() {
         <div class="sp-logs-header">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-media-text"></span>
-                Journal d'Activité
+                Activity Log
             </h2>
             <div class="sp-logs-info">
                 <span class="sp-badge">scheduler-pro.log</span>
@@ -33,7 +33,7 @@ function sp_render_logs_tab() {
 
         <div class="sp-logs-container">
             <?php if (empty($logs)): ?>
-                <p class="sp-no-logs">Aucune activité enregistrée.</p>
+                <p class="sp-no-logs">No activity recorded yet.</p>
             <?php else: ?>
                 <?php foreach ($logs as $line): ?>
                     <?php

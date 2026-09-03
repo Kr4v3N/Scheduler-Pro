@@ -2,55 +2,52 @@
 /**
  * LOCK MANAGER - Scheduler Pro v2.5
  *
- * Système de verrouillage pour éviter les exécutions concurrentes.
+ * Locking system to prevent concurrent executions.
  *
- * Stocke les verrous dans wp_options, en SQL direct (INSERT IGNORE / UPDATE
- * conditionnel), PAS via les transients WordPress ni via add_option().
+ * Stores locks in wp_options, using direct SQL (INSERT IGNORE /
+ * conditional UPDATE), NOT via WordPress transients nor via add_option().
  *
- * IMPORTANT : add_option() n'est PAS une primitive atomique fiable pour ce
- * cas d'usage, contrairement à ce qu'on pourrait attendre de la contrainte
- * UNIQUE sur option_name. Le cœur WordPress exécute en réalité un
- * INSERT ... ON DUPLICATE KEY UPDATE (vérifié dans wp-includes/option.php) :
- * en cas de conflit, ça ÉCRASE la ligne existante avec les nouvelles valeurs
- * au lieu d'échouer. Deux appelants concurrents peuvent donc tous les deux
- * recevoir true, chacun écrasant le verrou de l'autre - exactement le bug
- * que ce fichier cherche à éliminer. D'où l'usage direct d'INSERT IGNORE
- * (qui ne touche jamais une ligne existante) pour l'acquisition, et d'un
- * UPDATE conditionné sur l'ancienne valeur (compare-and-swap) pour le
- * remplacement d'un verrou périmé.
+ * IMPORTANT: add_option() is NOT a reliable atomic primitive for this use
+ * case, contrary to what you'd expect from the UNIQUE constraint on
+ * option_name. WordPress core actually runs an
+ * INSERT ... ON DUPLICATE KEY UPDATE (verified in wp-includes/option.php):
+ * on conflict, it OVERWRITES the existing row with the new values instead
+ * of failing. Two concurrent callers can therefore both receive true,
+ * each overwriting the other's lock - exactly the bug this file is
+ * meant to eliminate. Hence the direct use of INSERT IGNORE (which never
+ * touches an existing row) for acquisition, and an UPDATE conditioned on
+ * the previous value (compare-and-swap) for replacing a stale lock.
  *
- * Les transients (get_transient() + set_transient() séparés) exposaient le
- * même genre de fenêtre de course de façon encore plus visible : deux
- * appelants quasi simultanés pouvaient tous deux lire "pas de verrou" avant
- * que l'un des deux n'écrive le sien.
+ * Transients (separate get_transient() + set_transient() calls) exposed
+ * the same kind of race window even more visibly: two near-simultaneous
+ * callers could both read "no lock" before either of them wrote theirs.
  */
 
 if (!defined('ABSPATH')) exit;
 
 class SP_Lock_Manager {
 
-    const DEFAULT_TIMEOUT = 300; // 5 minutes (timeout par défaut d'un verrou)
+    const DEFAULT_TIMEOUT = 300; // 5 minutes (default timeout for a lock)
 
     /**
-     * Seuil utilisé par le nettoyage quotidien pour considérer un verrou
-     * comme abandonné. Volontairement plus large que DEFAULT_TIMEOUT :
-     * le verrou 'main_scheduling' (voir includes/engine.php) est acquis
-     * avec un timeout de 600s. Un seuil de nettoyage fixé à
-     * DEFAULT_TIMEOUT (300s) supprimerait ce verrou alors qu'une
-     * exécution légitime tourne encore. 1800s reste confortablement
-     * au-dessus du plus grand timeout utilisé dans le plugin tout en
-     * finissant par nettoyer les verrous réellement abandonnés (crash).
+     * Threshold used by the daily cleanup to consider a lock abandoned.
+     * Deliberately larger than DEFAULT_TIMEOUT: the 'main_scheduling'
+     * lock (see includes/engine.php) is acquired with a 600s timeout. A
+     * cleanup threshold set to DEFAULT_TIMEOUT (300s) would delete that
+     * lock while a legitimate run is still in progress. 1800s stays
+     * comfortably above the largest timeout used in the plugin while
+     * still eventually cleaning up genuinely abandoned locks (crash).
      */
     const STALE_CLEANUP_THRESHOLD = 1800; // 30 minutes
 
     const LOCK_PREFIX = 'sp_lock_';
 
     /**
-     * Acquérir un verrou de façon atomique
+     * Atomically acquire a lock
      *
-     * @param string $lock_name Nom du verrou (ex: 'main_scheduling')
-     * @param int $timeout Durée maximale du verrou en secondes
-     * @return bool True si verrou acquis, False si déjà actif
+     * @param string $lock_name Lock name (e.g. 'main_scheduling')
+     * @param int $timeout Maximum lock duration in seconds
+     * @return bool True if the lock was acquired, False if already active
      */
     public static function acquire($lock_name, $timeout = self::DEFAULT_TIMEOUT) {
         global $wpdb;
@@ -58,12 +55,12 @@ class SP_Lock_Manager {
         $lock_key = self::LOCK_PREFIX . sanitize_key($lock_name);
         $now = time();
 
-        // Tentative d'acquisition atomique via INSERT IGNORE : contrairement à
-        // add_option(), qui exécute en réalité un INSERT ... ON DUPLICATE KEY
-        // UPDATE côté cœur WordPress (vérifié dans wp-includes/option.php),
-        // INSERT IGNORE n'écrase JAMAIS une ligne existante en cas de conflit -
-        // il échoue silencieusement (0 ligne affectée). C'est la seule des deux
-        // requêtes qui garantit qu'un seul appelant concurrent peut gagner.
+        // Atomic acquisition attempt via INSERT IGNORE: unlike add_option(),
+        // which actually runs an INSERT ... ON DUPLICATE KEY UPDATE on the
+        // WordPress core side (verified in wp-includes/option.php),
+        // INSERT IGNORE NEVER overwrites an existing row on conflict - it
+        // fails silently (0 rows affected). This is the only one of the two
+        // queries that guarantees only one concurrent caller can win.
         $inserted = $wpdb->query($wpdb->prepare(
             "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
             $lock_key, $now
@@ -71,13 +68,13 @@ class SP_Lock_Manager {
 
         if ($inserted === 1) {
             wp_cache_delete($lock_key, 'options');
-            sp_log("🔒 Verrou acquis sur '{$lock_name}' (timeout: {$timeout}s)", 'INFO');
+            sp_log("🔒 Lock acquired on '{$lock_name}' (timeout: {$timeout}s)", 'INFO');
             return true;
         }
 
-        // La clé existe déjà : vérifier si le verrou est périmé (crash, bug).
-        // Lecture en SQL direct (pas get_option()) pour ne jamais risquer de lire
-        // une valeur mise en cache avant l'INSERT IGNORE ci-dessus.
+        // The key already exists: check whether the lock is stale (crash, bug).
+        // Read via direct SQL (not get_option()) to never risk reading a
+        // value cached before the INSERT IGNORE above.
         $existing = (string) $wpdb->get_var($wpdb->prepare(
             "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
             $lock_key
@@ -85,11 +82,11 @@ class SP_Lock_Manager {
         $age = $now - (int) $existing;
 
         if ($age > $timeout) {
-            // Remplacement par compare-and-swap : la clause WHERE inclut la
-            // valeur lue à l'instant, donc l'UPDATE n'affecte une ligne que si
-            // personne d'autre ne l'a déjà remplacée entre la lecture et
-            // l'écriture. Si un autre appelant a gagné entre-temps, $updated
-            // vaut 0 et on abandonne proprement au lieu d'écraser son verrou.
+            // Compare-and-swap replacement: the WHERE clause includes the
+            // value just read, so the UPDATE only affects a row if no one
+            // else has already replaced it between the read and the write.
+            // If another caller won in the meantime, $updated is 0 and we
+            // back off cleanly instead of overwriting their lock.
             $updated = $wpdb->query($wpdb->prepare(
                 "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
                 $now, $lock_key, $existing
@@ -97,20 +94,20 @@ class SP_Lock_Manager {
 
             if ($updated === 1) {
                 wp_cache_delete($lock_key, 'options');
-                sp_log("🔓 Verrou périmé '{$lock_name}' remplacé (âge: {$age}s)", 'WARNING');
+                sp_log("🔓 Stale lock '{$lock_name}' replaced (age: {$age}s)", 'WARNING');
                 return true;
             }
 
-            sp_log("⚠️ Verrou '{$lock_name}' repris par un autre appelant entre-temps - abandon", 'WARNING');
+            sp_log("⚠️ Lock '{$lock_name}' taken over by another caller in the meantime - backing off", 'WARNING');
             return false;
         }
 
-        sp_log("⚠️ Verrou actif sur '{$lock_name}' (âge: {$age}s) - abandon", 'WARNING');
+        sp_log("⚠️ Lock active on '{$lock_name}' (age: {$age}s) - backing off", 'WARNING');
         return false;
     }
 
     /**
-     * Libérer un verrou
+     * Release a lock
      */
     public static function release($lock_name) {
         $lock_key = self::LOCK_PREFIX . sanitize_key($lock_name);
@@ -120,14 +117,14 @@ class SP_Lock_Manager {
         delete_option($lock_key);
 
         if ($existed) {
-            sp_log("🔓 Verrou libéré sur '{$lock_name}'", 'INFO');
+            sp_log("🔓 Lock released on '{$lock_name}'", 'INFO');
         }
 
         return $existed;
     }
 
     /**
-     * Vérifier si un verrou est actif
+     * Check whether a lock is active
      */
     public static function is_locked($lock_name) {
         $lock_key = self::LOCK_PREFIX . sanitize_key($lock_name);
@@ -135,7 +132,7 @@ class SP_Lock_Manager {
     }
 
     /**
-     * Obtenir l'âge d'un verrou en secondes
+     * Get the age of a lock in seconds
      */
     public static function get_lock_age($lock_name) {
         $lock_key = self::LOCK_PREFIX . sanitize_key($lock_name);
@@ -149,10 +146,10 @@ class SP_Lock_Manager {
     }
 
     /**
-     * Nettoyer tous les verrous périmés (appelé quotidiennement via cron)
+     * Clean up all stale locks (called daily via cron)
      *
-     * Utilise STALE_CLEANUP_THRESHOLD, pas DEFAULT_TIMEOUT : voir le
-     * docblock de la constante plus haut.
+     * Uses STALE_CLEANUP_THRESHOLD, not DEFAULT_TIMEOUT: see the
+     * constant's docblock above.
      */
     public static function cleanup_stale_locks() {
         global $wpdb;
@@ -166,14 +163,14 @@ class SP_Lock_Manager {
         ", $wpdb->esc_like(self::LOCK_PREFIX) . '%', $cutoff));
 
         if ($deleted > 0) {
-            sp_log("🧹 {$deleted} verrou(s) périmé(s) nettoyé(s)", 'CLEANUP');
+            sp_log("🧹 {$deleted} stale lock(s) cleaned up", 'CLEANUP');
         }
 
         return $deleted;
     }
 
     /**
-     * Nettoyer TOUS les verrous (forcé, utilisé à la désactivation)
+     * Clean up ALL locks (forced, used on deactivation)
      */
     public static function cleanup_all_locks() {
         global $wpdb;
@@ -184,14 +181,14 @@ class SP_Lock_Manager {
         ", $wpdb->esc_like(self::LOCK_PREFIX) . '%'));
 
         if ($deleted > 0) {
-            sp_log("🧹 {$deleted} verrou(s) supprimé(s) lors du nettoyage forcé", 'CLEANUP');
+            sp_log("🧹 {$deleted} lock(s) removed during forced cleanup", 'CLEANUP');
         }
 
         return $deleted;
     }
 
     /**
-     * Lister tous les verrous actifs
+     * List all active locks
      */
     public static function list_active_locks() {
         global $wpdb;
@@ -213,7 +210,7 @@ class SP_Lock_Manager {
     }
 
     /**
-     * Exécuter une fonction avec verrouillage automatique
+     * Run a function with automatic locking
      */
     public static function execute_with_lock($lock_name, callable $callback, $timeout = self::DEFAULT_TIMEOUT) {
         if (!self::acquire($lock_name, $timeout)) {
@@ -229,12 +226,12 @@ class SP_Lock_Manager {
 }
 
 /**
- * Hook de nettoyage quotidien
+ * Daily cleanup hook
  */
 add_action('sp_daily_cleanup', array('SP_Lock_Manager', 'cleanup_stale_locks'));
 
 /**
- * Fonctions helper pour la compatibilité avec l'ancien code
+ * Helper functions for backward compatibility
  */
 if (!function_exists('sp_acquire_lock')) {
     function sp_acquire_lock($lock_name, $timeout = 300) {

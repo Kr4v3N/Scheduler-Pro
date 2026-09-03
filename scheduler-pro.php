@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Scheduler Pro
- * Description: Optimisation humaine et automatique de la planification des articles avec système avancé de monitoring.
+ * Description: Automatic, human-like post scheduling with an advanced monitoring system.
  * Version: 2.5
  * Author: Kr4v3n
  * Requires at least: 5.8
@@ -11,35 +11,35 @@
 
 if (!defined('ABSPATH')) exit;
 
-// Vérification de la version PHP
+// Check the PHP version
 if (version_compare(PHP_VERSION, '7.4', '<')) {
     add_action('admin_notices', function() {
         echo '<div class="notice notice-error"><p>';
-        echo '<strong>Scheduler Pro</strong> nécessite PHP 7.4 ou supérieur. ';
-        echo 'Votre version actuelle : ' . PHP_VERSION;
+        echo '<strong>Scheduler Pro</strong> requires PHP 7.4 or higher. ';
+        echo 'Your current version: ' . PHP_VERSION;
         echo '</p></div>';
     });
     return;
 }
 
-// Constantes de chemin
+// Path constants
 define('SP_VERSION', '2.5.0');
 define('SP_PATH', plugin_dir_path(__FILE__));
 define('SP_URL', plugin_dir_url(__FILE__));
 define('SP_BASENAME', plugin_basename(__FILE__));
 
 /**
- * Chargement des fichiers "core", indépendants de l'admin.
+ * Load the "core" files, independent from the admin.
  *
- * IMPORTANT : cette fonction doit rester idempotente (require_once) et
- * être appelée à la fois depuis sp_init_plugin() (hook plugins_loaded,
- * cas normal) ET explicitement depuis sp_activate_plugin(). Au moment où
- * le hook d'activation se déclenche, plugins_loaded a déjà eu lieu pour
- * cette requête SANS que ce plugin ait encore été considéré actif (il
- * est en train de le devenir) : sp_init_plugin() n'a donc jamais tourné
- * sur cette requête, et les classes ci-dessous n'existeraient pas sans
- * cet appel explicite — c'était la cause d'un bug où la table de la
- * queue n'était jamais créée à l'activation.
+ * IMPORTANT: this function must stay idempotent (require_once) and must
+ * be called both from sp_init_plugin() (plugins_loaded hook, the normal
+ * case) AND explicitly from sp_activate_plugin(). By the time the
+ * activation hook fires, plugins_loaded has already happened for this
+ * request WITHOUT this plugin having been considered active yet (it is
+ * in the process of becoming active): sp_init_plugin() therefore never
+ * ran on this request, and the classes below wouldn't exist without
+ * this explicit call — this was the cause of a bug where the queue
+ * table was never created on activation.
  */
 function sp_load_core_files() {
     require_once SP_PATH . 'includes/memory-guard.php';
@@ -55,12 +55,12 @@ function sp_load_core_files() {
 }
 
 /**
- * Chargement des composants principaux
+ * Load the main components
  */
 function sp_init_plugin() {
     sp_load_core_files();
 
-    // Interface Admin
+    // Admin interface
     if (is_admin()) {
         require_once SP_PATH . 'includes/admin/menu.php';
         require_once SP_PATH . 'includes/admin/actions.php';
@@ -71,98 +71,97 @@ function sp_init_plugin() {
         require_once SP_PATH . 'includes/admin/meta-box.php';
     }
 
-    // Charger la traduction
+    // Load the translation
     load_plugin_textdomain('scheduler-pro', false, dirname(SP_BASENAME) . '/languages');
 }
 add_action('plugins_loaded', 'sp_init_plugin');
 
 /**
- * Activation : Configuration initiale
+ * Activation: initial setup
  */
 register_activation_hook(__FILE__, 'sp_activate_plugin');
 function sp_activate_plugin() {
-    // Voir le docblock de sp_load_core_files() ci-dessus.
+    // See the docblock of sp_load_core_files() above.
     sp_load_core_files();
 
-    sp_log("🎉 Scheduler Pro v" . SP_VERSION . " activé", 'INSTALL');
+    sp_log("🎉 Scheduler Pro v" . SP_VERSION . " activated", 'INSTALL');
 
     SP_Database_Manager::create_tables();
 
-    // Nettoyer d'abord toute vieille planification pour éviter les doublons
+    // First clear any old schedule to avoid duplicates
     wp_clear_scheduled_hook('sp_daily_schedule_event');
     wp_clear_scheduled_hook('sp_daily_cleanup');
 
-    // Planifier la tâche quotidienne de scheduling à 00:30, heure du SITE
-    // (et non du serveur PHP — voir includes/time-helpers.php)
+    // Schedule the daily scheduling task at 00:30, SITE time
+    // (not the PHP server's — see includes/time-helpers.php)
     if (!wp_next_scheduled('sp_daily_schedule_event')) {
         $start_time = sp_get_site_gmt_timestamp('tomorrow 00:30:00');
         wp_schedule_event($start_time, 'daily', 'sp_daily_schedule_event');
     }
 
-    // Planifier le nettoyage quotidien à 03:00, heure du SITE
+    // Schedule the daily cleanup at 03:00, SITE time
     if (!wp_next_scheduled('sp_daily_cleanup')) {
         $cleanup_time = sp_get_site_gmt_timestamp('tomorrow 03:00:00');
         wp_schedule_event($cleanup_time, 'daily', 'sp_daily_cleanup');
     }
 
-    // Options par défaut
+    // Default options
     add_option('sp_posts_per_day', 3);
     add_option('sp_start_hour', 7);
     add_option('sp_end_hour', 20);
-    add_option('sp_auto_mode', '1'); // Activé par défaut
+    add_option('sp_auto_mode', '1'); // Enabled by default
     add_option('sp_force_replan', '0');
 
-    // Marquer la version installée
+    // Record the installed version
     update_option('sp_version', SP_VERSION);
 
-    // Message de succès
+    // Success message
     set_transient('sp_activation_notice', true, 30);
 }
 
 /**
- * Désactivation : Nettoyage
+ * Deactivation: cleanup
  */
 register_deactivation_hook(__FILE__, 'sp_deactivate_plugin');
 function sp_deactivate_plugin() {
-    // Contrairement à l'activation, la désactivation d'un plugin déjà actif
-    // se produit sur une requête où plugins_loaded a déjà chargé
-    // normalement toutes les classes du plugin : pas besoin de
-    // sp_load_core_files() ici.
+    // Unlike activation, deactivating an already-active plugin happens on
+    // a request where plugins_loaded already loaded all of the plugin's
+    // classes normally: no need for sp_load_core_files() here.
     if (function_exists('sp_log')) {
-        sp_log("👋 Scheduler Pro v" . SP_VERSION . " désactivé", 'UNINSTALL');
+        sp_log("👋 Scheduler Pro v" . SP_VERSION . " deactivated", 'UNINSTALL');
     }
 
-    // Nettoyer les tâches planifiées
+    // Clear the scheduled tasks
     wp_clear_scheduled_hook('sp_daily_schedule_event');
     wp_clear_scheduled_hook('sp_daily_cleanup');
 
-    // Nettoyer les verrous actifs
+    // Clear active locks
     if (class_exists('SP_Lock_Manager')) {
         SP_Lock_Manager::cleanup_all_locks();
     }
 }
 
 /**
- * Notice d'activation
+ * Activation notice
  */
 add_action('admin_notices', function() {
     if (get_transient('sp_activation_notice')) {
         ?>
         <div class="notice notice-success is-dismissible">
-            <h3>🎉 Scheduler Pro v<?php echo SP_VERSION; ?> activé avec succès !</h3>
+            <h3>🎉 Scheduler Pro v<?php echo SP_VERSION; ?> activated successfully!</h3>
             <p>
-                <strong>Nouveautés de cette version :</strong>
-                ✅ Verrouillage atomique anti-doublon
-                ✅ Planification fiable sur tous les fuseaux horaires
-                ✅ Journal d'activité protégé contre l'accès direct
-                ✅ Architecture modulaire
+                <strong>What's new in this version:</strong>
+                ✅ Atomic anti-duplicate locking
+                ✅ Reliable scheduling across all timezones
+                ✅ Activity log protected against direct access
+                ✅ Modular architecture
             </p>
             <p>
                 <a href="<?php echo admin_url('admin.php?page=scheduler-pro'); ?>" class="button button-primary">
-                    ⚙️ Configurer maintenant
+                    ⚙️ Configure Now
                 </a>
                 <a href="<?php echo admin_url('admin.php?page=scheduler-pro&tab=monitoring'); ?>" class="button">
-                    📊 Voir le Monitoring
+                    📊 View Monitoring
                 </a>
             </p>
         </div>
@@ -172,10 +171,10 @@ add_action('admin_notices', function() {
 });
 
 /**
- * Lien vers les réglages dans la liste des plugins
+ * Link to the settings from the plugins list
  */
 add_filter('plugin_action_links_' . SP_BASENAME, function($links) {
-    $settings_link = '<a href="' . admin_url('admin.php?page=scheduler-pro') . '">⚙️ Réglages</a>';
+    $settings_link = '<a href="' . admin_url('admin.php?page=scheduler-pro') . '">⚙️ Settings</a>';
     $monitoring_link = '<a href="' . admin_url('admin.php?page=scheduler-pro&tab=monitoring') . '" style="color: #10b981; font-weight: bold;">📊 Monitoring</a>';
 
     array_unshift($links, $monitoring_link, $settings_link);
@@ -183,7 +182,7 @@ add_filter('plugin_action_links_' . SP_BASENAME, function($links) {
 });
 
 /**
- * Enregistrer les assets
+ * Register the assets
  */
 add_action('admin_enqueue_scripts', function($hook) {
     if (strpos($hook, 'scheduler-pro') === false) {
@@ -205,7 +204,7 @@ add_action('admin_enqueue_scripts', function($hook) {
         true
     );
 
-    // Passer des variables JS
+    // Pass JS variables
     wp_localize_script('sp-admin-script', 'spData', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('sp_ajax_nonce'),
@@ -214,35 +213,35 @@ add_action('admin_enqueue_scripts', function($hook) {
 });
 
 /**
- * Vérifier les mises à jour de schéma DB
+ * Check for DB schema updates
  */
 add_action('plugins_loaded', function() {
     $installed_version = get_option('sp_version', '0');
 
     if (version_compare($installed_version, SP_VERSION, '<')) {
-        // Mise à jour nécessaire
-        sp_log("🔄 Mise à jour de v{$installed_version} vers v" . SP_VERSION, 'UPDATE');
+        // Update needed
+        sp_log("🔄 Updating from v{$installed_version} to v" . SP_VERSION, 'UPDATE');
 
-        // Recréer les tables si nécessaire
+        // Recreate the tables if needed
         if (class_exists('SP_Database_Manager')) {
             SP_Database_Manager::create_tables();
         }
 
-        // Mettre à jour la version
+        // Update the version
         update_option('sp_version', SP_VERSION);
 
-        sp_log("✅ Mise à jour terminée vers v" . SP_VERSION, 'UPDATE');
+        sp_log("✅ Update to v" . SP_VERSION . " complete", 'UPDATE');
     }
 });
 
 /**
- * Action AJAX pour les opérations en temps réel
+ * AJAX action for real-time operations
  */
 add_action('wp_ajax_sp_get_stats', function() {
     check_ajax_referer('sp_ajax_nonce', 'nonce');
 
     if (!current_user_can('manage_options')) {
-        wp_send_json_error('Accès refusé');
+        wp_send_json_error('Access denied');
     }
 
     $stats = array(
