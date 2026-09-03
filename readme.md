@@ -311,7 +311,6 @@ Ajout du système de logs et du mode Grand Ménage. Mise à jour recommandée.
 
 = Crédits =
 * Développé par Kr4v3n
-* Audit et optimisation v2.0 par Claude (Anthropic)
 * Tests et validation : Communauté WordPress
 
 = Support =
