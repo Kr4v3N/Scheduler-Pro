@@ -173,9 +173,12 @@ class SP_Heartbeat_Monitor {
         }
         
         // 5. Vérifier la mémoire disponible
+        // IMPORTANT : ne pas faire un simple (int) cast, qui lit "1G" comme 1
+        // (au lieu de 1024) — utiliser sp_convert_to_bytes() (includes/memory-guard.php),
+        // déjà utilisé par le moteur pour la même conversion.
         $memory_limit = ini_get('memory_limit');
-        $memory_limit_mb = (int) $memory_limit;
-        
+        $memory_limit_mb = sp_convert_to_bytes($memory_limit) / (1024 * 1024);
+
         if ($memory_limit_mb > 0 && $memory_limit_mb < 128) {
             $issues[] = array(
                 'type' => 'low_memory',
@@ -233,7 +236,7 @@ class SP_Heartbeat_Monitor {
                         📖 Guide : Configurer un vrai Cron serveur
                     </a>
                     
-                    <a href="<?php echo admin_url('admin.php?page=scheduler-pro&action=test_cron'); ?>" 
+                    <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=scheduler-pro&action=test_cron'), 'sp_test_cron_nonce')); ?>"
                        class="button">
                         🔧 Tester le WP-Cron
                     </a>
@@ -422,7 +425,9 @@ add_action('admin_init', function() {
         if (!current_user_can('manage_options')) {
             wp_die('Accès refusé');
         }
-        
+
+        check_admin_referer('sp_test_cron_nonce');
+
         $result = SP_Heartbeat_Monitor::test_cron_execution();
         
         $redirect_url = add_query_arg(
