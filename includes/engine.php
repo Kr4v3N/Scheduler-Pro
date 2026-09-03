@@ -73,7 +73,6 @@ if (!function_exists('sp_process_scheduling')) {
             $base_args = array(
                 'post_status'    => 'future', // ✅ UNIQUEMENT LES ARTICLES PLANIFIÉS
                 'post_type'      => 'post',
-                'orderby'        => 'date',
                 'order'          => 'ASC',
                 'fields'         => 'ids',
             );
@@ -101,6 +100,17 @@ if (!function_exists('sp_process_scheduling')) {
             // le jeu de résultats NE rétrécit PAS d'un lot à l'autre, l'offset reste donc
             // nécessaire pour avancer dans la liste sans reboucler sur les mêmes articles.
             $use_offset = ($force_replan === '1');
+
+            // Le mode Grand Ménage pagine par offset PENDANT que la boucle réécrit
+            // post_date (via wp_update_post() plus bas) - trier par date rendrait cette
+            // pagination instable : un article déjà traité, une fois sa nouvelle date
+            // appliquée, peut se retrouver positionné avant ou après des articles pas
+            // encore traités, décalant "position 100" d'une requête à l'autre et faisant
+            // sauter ou retraiter des articles. Trier par ID (immuable pendant
+            // l'exécution) garde cette pagination fiable. Le mode Adhésif n'utilise pas
+            // l'offset (cf. ci-dessus) donc n'a pas ce problème : on y garde le tri
+            // chronologique par date, plus logique pour l'utilisateur.
+            $base_args['orderby'] = $use_offset ? 'ID' : 'date';
 
             if (!$use_offset) {
                 $base_args['meta_query'] = array(
@@ -146,6 +156,10 @@ if (!function_exists('sp_process_scheduling')) {
                 }
 
                 sp_log("📦 Lot #{$batch_number} : " . count($post_ids) . " articles FUTURS à traiter", 'INFO');
+
+                // Utilisé après la boucle pour détecter un lot entièrement en échec
+                // (voir garde-fou anti-boucle-infinie plus bas)
+                $total_processed_before_batch = $total_processed;
 
                 // === ÉTAPE 6 : TRAITEMENT DES ARTICLES ===
                 // (les articles verrouillés sont déjà exclus par la requête, cf. ÉTAPE 4)
@@ -202,6 +216,23 @@ if (!function_exists('sp_process_scheduling')) {
                             array('batch' => $batch_number)
                         );
                     }
+                }
+
+                // Garde-fou anti-boucle-infinie : en mode Adhésif, offset reste à 0 en
+                // permanence (voir plus haut). Si un lot COMPLET (100 résultats) ne produit
+                // AUCUN succès (ex: un autre plugin bloque wp_update_post() sur tous ces
+                // articles via son propre hook save_post), aucun d'eux ne reçoit
+                // _is_smart_scheduled : ils réapparaîtraient à l'identique au lot suivant,
+                // indéfiniment. sp_process_scheduling() tourne en synchrone dans une
+                // requête HTTP (bouton "Lancer maintenant", test du cron, pseudo-cron WP) :
+                // une boucle infinie finirait par heurter max_execution_time, tuant le
+                // process SANS passer par le bloc finally qui libère le verrou - le
+                // bloquant jusqu'à son propre timeout. On s'arrête donc explicitement
+                // plutôt que de laisser cette situation se produire.
+                if (!$use_offset && count($post_ids) === $batch_size && $total_processed === $total_processed_before_batch) {
+                    sp_log("❌ ERREUR : lot #{$batch_number} entièrement en échec (0 succès sur {$batch_size}) - arrêt pour éviter une boucle infinie. Vérifiez si un plugin tiers bloque wp_update_post() sur ces articles.", 'ERROR');
+                    $completed_fully = false;
+                    break;
                 }
 
                 $batch_number++;
