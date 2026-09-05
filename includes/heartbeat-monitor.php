@@ -376,6 +376,14 @@ class SP_Heartbeat_Monitor {
 
     /**
      * Manually test WP-Cron
+     *
+     * Read-only diagnostic: this NEVER runs the scheduling engine (it used
+     * to, which meant a button labelled "Test" rewrote every future post's
+     * date - use the "Run Scheduling Now" button in Settings for that).
+     * What it checks:
+     * 1. Both plugin cron events are actually scheduled.
+     * 2. DISABLE_WP_CRON is not silently blocking automatic triggering.
+     * 3. Pings wp-cron.php (non-blocking) so any overdue event fires now.
      */
     public static function test_cron_execution() {
         sp_log("🧪 Manual WP-Cron test triggered", 'TEST');
@@ -383,34 +391,56 @@ class SP_Heartbeat_Monitor {
         // Record the test time
         update_option('sp_last_manual_test', time());
 
-        // Run the scheduling function immediately
-        if (function_exists('sp_process_scheduling')) {
-            $result = sp_process_scheduling();
+        // 1. Are the two plugin events scheduled?
+        $missing = array();
+        $schedule_next = wp_next_scheduled('sp_daily_schedule_event');
+        $cleanup_next  = wp_next_scheduled('sp_daily_cleanup');
 
-            if ($result && $result['success']) {
-                return array(
-                    'success' => true,
-                    'message' => sprintf(
-                        /* translators: %d: number of posts scheduled by the manual test */
-                        __('Test succeeded! %d posts scheduled.', 'scheduler-pro'),
-                        $result['processed']
-                    )
-                );
-            } else {
-                return array(
-                    'success' => false,
-                    'message' => sprintf(
-                        /* translators: %s: error message */
-                        __('Test failed: %s', 'scheduler-pro'),
-                        $result['message'] ?? __('Unknown error', 'scheduler-pro')
-                    )
-                );
-            }
+        if (!$schedule_next) {
+            $missing[] = 'sp_daily_schedule_event';
+        }
+        if (!$cleanup_next) {
+            $missing[] = 'sp_daily_cleanup';
         }
 
+        if (!empty($missing)) {
+            return array(
+                'success' => false,
+                'message' => sprintf(
+                    /* translators: %s: comma-separated list of cron event names */
+                    __('Cron event(s) not scheduled: %s. Deactivate then reactivate the plugin to recreate them.', 'scheduler-pro'),
+                    implode(', ', $missing)
+                )
+            );
+        }
+
+        // 2. Is WP-Cron disabled? The events exist, but nothing will trigger
+        // them on page loads: only a real server cron calling wp-cron.php
+        // will. The plugin cannot verify that from the inside, so warn.
+        if (self::is_wp_cron_disabled()) {
+            return array(
+                'success' => false,
+                'message' => __('WP-Cron is disabled (DISABLE_WP_CRON): the events are scheduled, but WordPress will not trigger them automatically. Make sure a real server cron calls wp-cron.php regularly.', 'scheduler-pro')
+            );
+        }
+
+        // 3. Nudge wp-cron.php so any overdue event fires immediately
+        // (non-blocking: reachability issues would surface as a missed run,
+        // which the health check above already reports).
+        wp_remote_post(site_url('wp-cron.php?doing_wp_cron'), array(
+            'timeout'   => 1,
+            'blocking'  => false,
+            'sslverify' => false,
+        ));
+
         return array(
-            'success' => false,
-            'message' => __('Scheduling function unavailable', 'scheduler-pro')
+            'success' => true,
+            'message' => sprintf(
+                /* translators: 1: next scheduling run date, 2: next cleanup run date */
+                __('WP-Cron OK. Next scheduling run: %1$s. Next cleanup: %2$s. A wp-cron.php request was triggered to run any overdue event now.', 'scheduler-pro'),
+                wp_date('Y-m-d H:i:s', $schedule_next),
+                wp_date('Y-m-d H:i:s', $cleanup_next)
+            )
         );
     }
 
