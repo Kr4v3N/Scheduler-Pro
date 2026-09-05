@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.3
+Stable tag: 2.6.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ Ultra-smart automatic scheduler for WordPress: advanced post publishing manageme
 
 = 🎯 Why Scheduler Pro? =
 
-Most scheduling plugins use simple algorithms that create detectable patterns. **Scheduler Pro v2.5** goes much further:
+Most scheduling plugins use simple algorithms that create detectable patterns. **Scheduler Pro** goes much further:
 
 * **Gaussian distribution** with activity peaks at 9am, 2pm and 5pm
 * **Pattern avoidance**: variable minutes and seconds, never overly round values
@@ -177,7 +177,7 @@ WP-Cron depends on your site's traffic. For maximum reliability (99.9%), we stro
 
 = How many posts can the plugin handle? =
 
-Scheduler Pro v2.5 can handle **thousands of posts** thanks to its batching system. Successfully tested with 10,000 scheduled posts.
+Scheduler Pro can handle **thousands of posts** thanks to its batching system. Successfully tested with 10,000 scheduled posts.
 
 = Is the plugin compatible with Gutenberg / Elementor / other builders? =
 
@@ -201,6 +201,19 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.4 - 2026-09-06 =
+
+**🔧 Fixes**
+* The queue table (`wp_scheduler_queue`) grew forever: rows were written as "pending" but nothing ever transitioned them, and the daily cleanup only removed completed/failed rows. The engine now records its trace rows as "completed" (they are written after the post was actually rescheduled), and the daily cleanup also purges old "pending" rows.
+* "Test WP-Cron" no longer reschedules your posts: it is now a read-only diagnostic (checks that both cron events are scheduled, warns if DISABLE_WP_CRON blocks automatic triggering, and pings wp-cron.php so any overdue event fires). Use "Run Scheduling Now" for a real run.
+* Adhesive mode: the resume anchor now ignores locked posts and excluded categories. Previously, a single locked or excluded post dated far ahead would push ALL new scheduling after it.
+* The scheduling loop now stops at 80% of max_execution_time between batches, like it already did for memory: a manual run on a large backlog no longer gets killed mid-batch (which also left the execution lock in place until its own timeout).
+* Monitoring: "Next run" now uses the site's timezone instead of the PHP server's.
+* Uninstall now fully removes the log directory (the hidden .htaccess file used to survive).
+
+**🌍 i18n**
+* Engine result messages shown in admin notices ("X posts successfully scheduled", etc.) are now translatable too.
 
 = 2.6.3 - 2026-09-05 =
 
@@ -301,12 +314,11 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 * Responsive (mobile-friendly)
 
 **🔧 Technical Improvements**
-* Modular MVC architecture
+* Modular file architecture
 * Separate classes: Lock Manager, Database Manager, Heartbeat Monitor
 * Helper functions for compatibility
 * Standard WordPress hooks
 * Documented codebase
-* Unit tests included
 
 **📚 Documentation**
 * Full README with use cases
