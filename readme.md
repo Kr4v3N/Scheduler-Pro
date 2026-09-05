@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,11 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.3 - 2026-09-05 =
+
+**🌍 New Feature**
+* **French translation**: the entire admin interface (Settings, Monitoring, Activity Log, and About tabs, the per-post locking meta box, dashboard widgets, activation notices, and the critical-status alert email) is now translatable via the standard WordPress i18n system. English stays the default; the interface switches to French automatically when the site's language is set to French (`fr_FR`), no configuration needed beyond WordPress's own language setting.
 
 = 2.6.2 - 2026-09-03 =
 
