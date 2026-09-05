@@ -77,9 +77,13 @@ class SP_Database_Manager {
      * @param string $scheduled_date Scheduled date (Y-m-d H:i:s)
      * @param int $priority Priority (10=urgent, 90=background)
      * @param array $metadata Additional data
+     * @param string $status Initial status. The engine passes STATUS_COMPLETED
+     *                       because it writes the trace row only AFTER the new
+     *                       date has actually been applied to the post: the row
+     *                       records something already done, not work to do.
      * @return int|false Task ID or false on failure
      */
-    public static function add_task($post_id, $scheduled_date, $priority = 50, $metadata = array()) {
+    public static function add_task($post_id, $scheduled_date, $priority = 50, $metadata = array(), $status = self::STATUS_PENDING) {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::TABLE_NAME;
@@ -89,7 +93,7 @@ class SP_Database_Manager {
             array(
                 'post_id' => $post_id,
                 'scheduled_date' => $scheduled_date,
-                'status' => self::STATUS_PENDING,
+                'status' => $status,
                 'priority' => max(10, min(90, $priority)),
                 'metadata' => !empty($metadata) ? json_encode($metadata) : null,
             ),
@@ -232,7 +236,13 @@ class SP_Database_Manager {
     }
 
     /**
-     * Clean up old completed tasks
+     * Clean up old tasks
+     *
+     * Also purges 'pending' rows, not just completed/failed ones: no worker
+     * ever consumes this queue (the table is a write-only trace/history, see
+     * CLAUDE.md), so a 'pending' row never transitions to anything else.
+     * Without this, every scheduling run would add rows that are NEVER
+     * deleted and the table would grow forever.
      *
      * @param int $days Number of days to keep
      * @return int Number of tasks removed
@@ -244,9 +254,9 @@ class SP_Database_Manager {
 
         $deleted = $wpdb->query($wpdb->prepare("
             DELETE FROM $table_name
-            WHERE status IN (%s, %s)
+            WHERE status IN (%s, %s, %s)
             AND updated_at < DATE_SUB(NOW(), INTERVAL %d DAY)
-        ", self::STATUS_COMPLETED, self::STATUS_FAILED, $days));
+        ", self::STATUS_COMPLETED, self::STATUS_FAILED, self::STATUS_PENDING, $days));
 
         if ($deleted > 0) {
             sp_log("🧹 {$deleted} old task(s) removed (> {$days} days)", 'CLEANUP');

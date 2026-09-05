@@ -289,13 +289,17 @@ if (!function_exists('sp_process_scheduling')) {
                     sp_log(($dry_run ? "👁️ [Preview] Post ID {$post_id} → {$new_date}" : "✅ Post ID {$post_id} → {$new_date}"), 'SUCCESS');
                     $total_processed++;
 
-                    // Optional: add to the queue table
+                    // Optional: add to the queue table. The row is written
+                    // AFTER wp_update_post() succeeded, so it is recorded
+                    // directly as completed: the table is a trace of what was
+                    // done, and old rows are purged by the daily cleanup.
                     if (!$dry_run && class_exists('SP_Database_Manager')) {
                         SP_Database_Manager::add_task(
                             $post_id,
                             $new_date,
                             50, // Normal priority
-                            array('batch' => $batch_number)
+                            array('batch' => $batch_number),
+                            SP_Database_Manager::STATUS_COMPLETED
                         );
                     }
                 }
