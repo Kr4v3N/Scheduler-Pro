@@ -112,7 +112,10 @@ class SP_Heartbeat_Monitor {
 
         return array(
             'timestamp' => $timestamp,
-            'date' => date('Y-m-d H:i:s', $timestamp),
+            // wp_date() formats in the SITE timezone (unlike date(), which
+            // uses the PHP server's): the displayed "next run" matches the
+            // time the admin configured in WordPress.
+            'date' => wp_date('Y-m-d H:i:s', $timestamp),
             'human' => human_time_diff(time(), $timestamp),
             'in_future' => $timestamp > time(),
         );

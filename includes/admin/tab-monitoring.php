@@ -74,7 +74,7 @@ function sp_render_monitoring_tab() {
                 <?php esc_html_e('Scheduler Status', 'scheduler-pro'); ?>
             </h2>
 
-            <div class="sp-health-status sp-health-<?php echo $health['level']; ?>">
+            <div class="sp-health-status sp-health-<?php echo esc_attr($health['level']); ?>">
                 <div class="sp-health-icon">
                     <?php if ($health['level'] === 'success'): ?>
                         <span class="dashicons dashicons-yes-alt"></span>
@@ -112,7 +112,7 @@ function sp_render_monitoring_tab() {
             </h2>
 
             <?php foreach ($issues as $issue): ?>
-                <div class="sp-issue-item sp-issue-<?php echo $issue['severity']; ?>">
+                <div class="sp-issue-item sp-issue-<?php echo esc_attr($issue['severity']); ?>">
                     <div class="sp-issue-icon">
                         <span class="dashicons dashicons-info"></span>
                     </div>

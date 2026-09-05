@@ -192,11 +192,15 @@ if (!function_exists('sp_process_scheduling')) {
             $batch_number = 1;
             $completed_fully = true;
             $preview = array(); // Only populated when $dry_run is true
+            $started_at = time(); // For the time guard (see below)
 
             do {
-                // Check memory
-                if (!sp_check_memory_available()) {
-                    sp_log("⚠️ Critical memory - pausing after {$total_processed} posts", 'WARNING');
+                // Check memory and elapsed time between batches: stop cleanly
+                // at 80% of either limit rather than being killed mid-batch
+                // (a PHP timeout never runs the finally block that releases
+                // the lock).
+                if (!sp_check_memory_available() || !sp_check_time_available($started_at)) {
+                    sp_log("⚠️ Resource limit reached - pausing after {$total_processed} posts", 'WARNING');
                     $completed_fully = false;
                     break;
                 }
@@ -349,7 +353,7 @@ if (!function_exists('sp_process_scheduling')) {
                         update_option('sp_force_replan', '0');
                         sp_log("🔄 'Full Reset' mode automatically disabled (processing complete)", 'INFO');
                     } else {
-                        sp_log("⚠️ 'Full Reset' mode left enabled: processing stopped prematurely (memory). Re-run the scheduler to finish.", 'WARNING');
+                        sp_log("⚠️ 'Full Reset' mode left enabled: processing stopped prematurely (memory/time). Re-run the scheduler to finish.", 'WARNING');
                     }
                 }
 

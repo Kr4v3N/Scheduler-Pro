@@ -58,12 +58,16 @@ $upload_dir = wp_upload_dir();
 $log_dir = trailingslashit($upload_dir['basedir']) . 'scheduler-pro-logs/';
 
 if (is_dir($log_dir)) {
-    $files = glob($log_dir . '*');
-    if ($files) {
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                @unlink($file);
-            }
+    // glob('*') alone misses dotfiles like .htaccess, which would then
+    // make rmdir() fail silently and the directory survive the uninstall.
+    // '.??*' matches dotfiles without ever matching '.' or '..'.
+    $files = array_merge(
+        glob($log_dir . '*') ?: array(),
+        glob($log_dir . '.??*') ?: array()
+    );
+    foreach ($files as $file) {
+        if (is_file($file)) {
+            @unlink($file);
         }
     }
     @rmdir($log_dir);
