@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Scheduler Pro
  * Description: Automatic, human-like post scheduling with an advanced monitoring system.
- * Version: 2.6.2
+ * Version: 2.6.3
  * Author: Kr4v3n
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -15,15 +15,19 @@ if (!defined('ABSPATH')) exit;
 if (version_compare(PHP_VERSION, '7.4', '<')) {
     add_action('admin_notices', function() {
         echo '<div class="notice notice-error"><p>';
-        echo '<strong>Scheduler Pro</strong> requires PHP 7.4 or higher. ';
-        echo 'Your current version: ' . PHP_VERSION;
+        printf(
+            /* translators: %1$s: plugin name (bold), %2$s: currently installed PHP version */
+            esc_html__('%1$s requires PHP 7.4 or higher. Your current version: %2$s', 'scheduler-pro'),
+            '<strong>Scheduler Pro</strong>',
+            esc_html(PHP_VERSION)
+        );
         echo '</p></div>';
     });
     return;
 }
 
 // Path constants
-define('SP_VERSION', '2.6.2');
+define('SP_VERSION', '2.6.3');
 define('SP_PATH', plugin_dir_path(__FILE__));
 define('SP_URL', plugin_dir_url(__FILE__));
 define('SP_BASENAME', plugin_basename(__FILE__));
@@ -153,21 +157,30 @@ add_action('admin_notices', function() {
     if (get_transient('sp_activation_notice')) {
         ?>
         <div class="notice notice-success is-dismissible">
-            <h3>🎉 Scheduler Pro v<?php echo SP_VERSION; ?> activated successfully!</h3>
+            <h3>
+                🎉
+                <?php
+                printf(
+                    /* translators: %s: plugin version number */
+                    esc_html__('Scheduler Pro v%s activated successfully!', 'scheduler-pro'),
+                    esc_html(SP_VERSION)
+                );
+                ?>
+            </h3>
             <p>
-                <strong>What's new in this version:</strong>
-                ✅ Flexible cadence (day/week/month)
-                ✅ Category exclusion
-                ✅ Preview before running
-                ✅ Email alerts
-                ✅ Calendar view
+                <strong><?php esc_html_e("What's new in this version:", 'scheduler-pro'); ?></strong>
+                ✅ <?php esc_html_e('Flexible cadence (day/week/month)', 'scheduler-pro'); ?>
+                ✅ <?php esc_html_e('Category exclusion', 'scheduler-pro'); ?>
+                ✅ <?php esc_html_e('Preview before running', 'scheduler-pro'); ?>
+                ✅ <?php esc_html_e('Email alerts', 'scheduler-pro'); ?>
+                ✅ <?php esc_html_e('Calendar view', 'scheduler-pro'); ?>
             </p>
             <p>
                 <a href="<?php echo admin_url('admin.php?page=scheduler-pro'); ?>" class="button button-primary">
-                    ⚙️ Configure Now
+                    ⚙️ <?php esc_html_e('Configure Now', 'scheduler-pro'); ?>
                 </a>
                 <a href="<?php echo admin_url('admin.php?page=scheduler-pro&tab=monitoring'); ?>" class="button">
-                    📊 View Monitoring
+                    📊 <?php esc_html_e('View Monitoring', 'scheduler-pro'); ?>
                 </a>
             </p>
         </div>
@@ -180,8 +193,8 @@ add_action('admin_notices', function() {
  * Link to the settings from the plugins list
  */
 add_filter('plugin_action_links_' . SP_BASENAME, function($links) {
-    $settings_link = '<a href="' . admin_url('admin.php?page=scheduler-pro') . '">⚙️ Settings</a>';
-    $monitoring_link = '<a href="' . admin_url('admin.php?page=scheduler-pro&tab=monitoring') . '" style="color: #10b981; font-weight: bold;">📊 Monitoring</a>';
+    $settings_link = '<a href="' . admin_url('admin.php?page=scheduler-pro') . '">⚙️ ' . esc_html__('Settings', 'scheduler-pro') . '</a>';
+    $monitoring_link = '<a href="' . admin_url('admin.php?page=scheduler-pro&tab=monitoring') . '" style="color: #10b981; font-weight: bold;">📊 ' . esc_html__('Monitoring', 'scheduler-pro') . '</a>';
 
     array_unshift($links, $monitoring_link, $settings_link);
     return $links;
@@ -215,6 +228,9 @@ add_action('admin_enqueue_scripts', function($hook) {
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('sp_ajax_nonce'),
         'version' => SP_VERSION,
+        'i18n' => array(
+            'processing' => __('Processing...', 'scheduler-pro'),
+        ),
     ));
 });
 
@@ -255,7 +271,7 @@ add_action('wp_ajax_sp_get_stats', function() {
     check_ajax_referer('sp_ajax_nonce', 'nonce');
 
     if (!current_user_can('manage_options')) {
-        wp_send_json_error('Access denied');
+        wp_send_json_error(__('Access denied', 'scheduler-pro'));
     }
 
     $stats = array(

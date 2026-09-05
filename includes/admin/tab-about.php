@@ -15,46 +15,46 @@ function sp_render_about_tab() {
             </h2>
 
             <p class="sp-about-description">
-                Advanced plugin for automatic, human-like WordPress post scheduling.
-                Designed to optimize your SEO publishing flow while keeping a natural appearance.
+                <?php esc_html_e('Advanced plugin for automatic, human-like WordPress post scheduling.', 'scheduler-pro'); ?>
+                <?php esc_html_e('Designed to optimize your SEO publishing flow while keeping a natural appearance.', 'scheduler-pro'); ?>
             </p>
 
-            <h3>✨ What's New in v2.6</h3>
+            <h3>✨ <?php esc_html_e("What's New in v2.6", 'scheduler-pro'); ?></h3>
             <ul class="sp-feature-list">
-                <li>✅ <strong>Flexible cadence</strong>: schedule by day, week, or month (e.g. "2/week", "6/month"), not just posts/day</li>
-                <li>✅ <strong>Category exclusion</strong>: keep entire categories out of auto-scheduling</li>
-                <li>✅ <strong>Preview before running</strong>: see the exact resulting dates before committing anything</li>
-                <li>✅ <strong>Email alerts</strong>: get notified if the scheduler stops running</li>
-                <li>✅ <strong>Calendar view</strong>: 2-month day-by-day view of the upcoming schedule</li>
+                <li>✅ <strong><?php esc_html_e('Flexible cadence', 'scheduler-pro'); ?></strong>: <?php esc_html_e('schedule by day, week, or month (e.g. "2/week", "6/month"), not just posts/day', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Category exclusion', 'scheduler-pro'); ?></strong>: <?php esc_html_e('keep entire categories out of auto-scheduling', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Preview before running', 'scheduler-pro'); ?></strong>: <?php esc_html_e('see the exact resulting dates before committing anything', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Email alerts', 'scheduler-pro'); ?></strong>: <?php esc_html_e('get notified if the scheduler stops running', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Calendar view', 'scheduler-pro'); ?></strong>: <?php esc_html_e('2-month day-by-day view of the upcoming schedule', 'scheduler-pro'); ?></li>
             </ul>
 
-            <h3>🧱 Core Features</h3>
+            <h3>🧱 <?php esc_html_e('Core Features', 'scheduler-pro'); ?></h3>
             <ul class="sp-feature-list">
-                <li>✅ <strong>Batch processing</strong>: handles thousands of posts without timing out</li>
-                <li>✅ <strong>Memory management</strong>: stops automatically if RAM usage gets too high</li>
-                <li>✅ <strong>Locking system</strong>: prevents duplicate runs</li>
-                <li>✅ <strong>Ultra-human generator</strong>: activity peaks at 9am, 2pm, 5pm</li>
-                <li>✅ <strong>Real-time monitoring</strong>: watches system health</li>
-                <li>✅ <strong>Task queue</strong>: full traceability of every scheduling run</li>
+                <li>✅ <strong><?php esc_html_e('Batch processing', 'scheduler-pro'); ?></strong>: <?php esc_html_e('handles thousands of posts without timing out', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Memory management', 'scheduler-pro'); ?></strong>: <?php esc_html_e('stops automatically if RAM usage gets too high', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Locking system', 'scheduler-pro'); ?></strong>: <?php esc_html_e('prevents duplicate runs', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Ultra-human generator', 'scheduler-pro'); ?></strong>: <?php esc_html_e('activity peaks at 9am, 2pm, 5pm', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Real-time monitoring', 'scheduler-pro'); ?></strong>: <?php esc_html_e('watches system health', 'scheduler-pro'); ?></li>
+                <li>✅ <strong><?php esc_html_e('Task queue', 'scheduler-pro'); ?></strong>: <?php esc_html_e('full traceability of every scheduling run', 'scheduler-pro'); ?></li>
             </ul>
 
-            <h3>🔧 Recommended Configuration</h3>
+            <h3>🔧 <?php esc_html_e('Recommended Configuration', 'scheduler-pro'); ?></h3>
             <table class="sp-config-table">
                 <tr>
-                    <td><strong>Cadence:</strong></td>
-                    <td>3-5/day (natural and SEO-friendly), or a week/month cadence for a lighter rhythm</td>
+                    <td><strong><?php esc_html_e('Cadence:', 'scheduler-pro'); ?></strong></td>
+                    <td><?php esc_html_e('3-5/day (natural and SEO-friendly), or a week/month cadence for a lighter rhythm', 'scheduler-pro'); ?></td>
                 </tr>
                 <tr>
-                    <td><strong>Time range:</strong></td>
-                    <td>7am-8pm (human activity hours)</td>
+                    <td><strong><?php esc_html_e('Time range:', 'scheduler-pro'); ?></strong></td>
+                    <td><?php esc_html_e('7am-8pm (human activity hours)', 'scheduler-pro'); ?></td>
                 </tr>
                 <tr>
-                    <td><strong>Auto mode:</strong></td>
-                    <td>Enabled (runs daily at 00:30, site time)</td>
+                    <td><strong><?php esc_html_e('Auto mode:', 'scheduler-pro'); ?></strong></td>
+                    <td><?php esc_html_e('Enabled (runs daily at 00:30, site time)', 'scheduler-pro'); ?></td>
                 </tr>
                 <tr>
-                    <td><strong>Server cron:</strong></td>
-                    <td>Recommended for maximum reliability</td>
+                    <td><strong><?php esc_html_e('Server cron:', 'scheduler-pro'); ?></strong></td>
+                    <td><?php esc_html_e('Recommended for maximum reliability', 'scheduler-pro'); ?></td>
                 </tr>
             </table>
         </div>
@@ -62,25 +62,25 @@ function sp_render_about_tab() {
         <div class="sp-card sp-card-help">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-sos"></span>
-                Need Help?
+                <?php esc_html_e('Need Help?', 'scheduler-pro'); ?>
             </h2>
 
             <div class="sp-help-section">
-                <h4>📖 Documentation</h4>
-                <p>Check the README file and guides bundled with the plugin.</p>
+                <h4>📖 <?php esc_html_e('Documentation', 'scheduler-pro'); ?></h4>
+                <p><?php esc_html_e('Check the README file and guides bundled with the plugin.', 'scheduler-pro'); ?></p>
             </div>
 
             <div class="sp-help-section">
-                <h4>🐛 Report a Bug</h4>
-                <p>Enable WordPress debug mode and check the logs.</p>
+                <h4>🐛 <?php esc_html_e('Report a Bug', 'scheduler-pro'); ?></h4>
+                <p><?php esc_html_e('Enable WordPress debug mode and check the logs.', 'scheduler-pro'); ?></p>
                 <code>define('WP_DEBUG', true);</code>
             </div>
 
             <div class="sp-help-section">
-                <h4>⚡ Performance</h4>
+                <h4>⚡ <?php esc_html_e('Performance', 'scheduler-pro'); ?></h4>
                 <p>
-                    <strong>Before v2.0:</strong> 1000 posts = 50s (frequent timeouts)<br>
-                    <strong>After v2.0:</strong> 1000 posts = 5s ✅
+                    <strong><?php esc_html_e('Before v2.0:', 'scheduler-pro'); ?></strong> <?php esc_html_e('1000 posts = 50s (frequent timeouts)', 'scheduler-pro'); ?><br>
+                    <strong><?php esc_html_e('After v2.0:', 'scheduler-pro'); ?></strong> <?php esc_html_e('1000 posts = 5s', 'scheduler-pro'); ?> ✅
                 </p>
             </div>
         </div>
@@ -88,7 +88,14 @@ function sp_render_about_tab() {
 
     <div class="sp-card sp-card-credits">
         <p style="text-align: center; opacity: 0.7;">
-            Developed by <strong>Kr4v3n</strong> | Version <?php echo SP_VERSION; ?>
+            <?php
+            printf(
+                /* translators: %1$s: developer name (bold), %2$s: plugin version number */
+                esc_html__('Developed by %1$s | Version %2$s', 'scheduler-pro'),
+                '<strong>Kr4v3n</strong>',
+                esc_html(SP_VERSION)
+            );
+            ?>
         </p>
     </div>
     <?php

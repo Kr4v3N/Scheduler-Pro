@@ -23,7 +23,7 @@ add_action('admin_menu', function() {
 
 function sp_admin_page_render() {
     if (!current_user_can('manage_options')) {
-        wp_die('Access denied');
+        wp_die(esc_html__('Access denied', 'scheduler-pro'));
     }
 
     $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'settings';
@@ -44,12 +44,12 @@ function sp_admin_page_render() {
             <?php if (SP_Heartbeat_Monitor::check_wp_cron_health()['level'] === 'success'): ?>
                 <div class="sp-status-badge sp-status-ok">
                     <span class="dashicons dashicons-yes-alt"></span>
-                    Scheduler Running
+                    <?php esc_html_e('Scheduler Running', 'scheduler-pro'); ?>
                 </div>
             <?php else: ?>
                 <div class="sp-status-badge sp-status-error">
                     <span class="dashicons dashicons-warning"></span>
-                    Issue Detected
+                    <?php esc_html_e('Issue Detected', 'scheduler-pro'); ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -64,22 +64,22 @@ function sp_admin_page_render() {
             <a href="?page=scheduler-pro&tab=settings"
                class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-admin-settings"></span>
-                Settings
+                <?php esc_html_e('Settings', 'scheduler-pro'); ?>
             </a>
             <a href="?page=scheduler-pro&tab=monitoring"
                class="nav-tab <?php echo $active_tab === 'monitoring' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-chart-area"></span>
-                Monitoring
+                <?php esc_html_e('Monitoring', 'scheduler-pro'); ?>
             </a>
             <a href="?page=scheduler-pro&tab=logs"
                class="nav-tab <?php echo $active_tab === 'logs' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-media-text"></span>
-                Activity Log
+                <?php esc_html_e('Activity Log', 'scheduler-pro'); ?>
             </a>
             <a href="?page=scheduler-pro&tab=about"
                class="nav-tab <?php echo $active_tab === 'about' ? 'nav-tab-active' : ''; ?>">
                 <span class="dashicons dashicons-info"></span>
-                About
+                <?php esc_html_e('About', 'scheduler-pro'); ?>
             </a>
         </nav>
 

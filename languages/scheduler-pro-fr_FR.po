@@ -1,0 +1,805 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Scheduler Pro 2.6.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-05 14:03+0200\n"
+"PO-Revision-Date: 2026-09-05 14:03+0200\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: manual\n"
+
+#. translators: %1$s: plugin name (bold), %2$s: currently installed PHP version
+#: scheduler-pro.php:20
+#, php-format
+msgid "%1$s requires PHP 7.4 or higher. Your current version: %2$s"
+msgstr "%1$s nécessite PHP 7.4 ou supérieur. Votre version actuelle : %2$s"
+
+#. translators: %s: plugin version number
+#: scheduler-pro.php:165
+#, php-format
+msgid "Scheduler Pro v%s activated successfully!"
+msgstr "Scheduler Pro v%s activé avec succès !"
+
+#: scheduler-pro.php:171
+msgid "What's new in this version:"
+msgstr "Nouveautés de cette version :"
+
+#: scheduler-pro.php:172
+msgid "Flexible cadence (day/week/month)"
+msgstr "Cadence flexible (jour/semaine/mois)"
+
+#: scheduler-pro.php:173 includes/admin/tab-about.php:25
+msgid "Category exclusion"
+msgstr "Exclusion de catégories"
+
+#: scheduler-pro.php:174 includes/admin/tab-about.php:26
+msgid "Preview before running"
+msgstr "Aperçu avant exécution"
+
+#: scheduler-pro.php:175 includes/admin/tab-about.php:27
+msgid "Email alerts"
+msgstr "Alertes email"
+
+#: scheduler-pro.php:176 includes/admin/tab-about.php:28
+msgid "Calendar view"
+msgstr "Vue calendrier"
+
+#: scheduler-pro.php:180
+msgid "Configure Now"
+msgstr "Configurer maintenant"
+
+#: scheduler-pro.php:183
+msgid "View Monitoring"
+msgstr "Voir le Monitoring"
+
+#: scheduler-pro.php:196 includes/admin/menu.php:67
+msgid "Settings"
+msgstr "Réglages"
+
+#: scheduler-pro.php:197 includes/admin/menu.php:72
+msgid "Monitoring"
+msgstr "Monitoring"
+
+#: scheduler-pro.php:232
+msgid "Processing..."
+msgstr "Traitement en cours..."
+
+#: scheduler-pro.php:274 includes/heartbeat-monitor.php:524
+#: includes/admin/menu.php:26
+msgid "Access denied"
+msgstr "Accès refusé"
+
+#: includes/heartbeat-monitor.php:52
+msgid "No run recorded"
+msgstr "Aucune exécution enregistrée"
+
+#: includes/heartbeat-monitor.php:53
+msgid "The scheduler has never run yet, or was just installed."
+msgstr "Le planificateur ne s'est jamais exécuté, ou vient d'être installé."
+
+#: includes/heartbeat-monitor.php:59
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: includes/heartbeat-monitor.php:66
+msgid "Scheduler running normally"
+msgstr "Le planificateur fonctionne normalement"
+
+#. translators: 1: last run date/time, 2: human-readable time elapsed since then
+#: includes/heartbeat-monitor.php:69
+#, php-format
+msgid "Last run: %1$s (%2$s ago)"
+msgstr "Dernière exécution : %1$s (il y a %2$s)"
+
+#: includes/heartbeat-monitor.php:81
+msgid "Scheduler inactive!"
+msgstr "Planificateur inactif !"
+
+#. translators: 1: last run date/time, 2: human-readable time elapsed since then
+#: includes/heartbeat-monitor.php:84
+#, php-format
+msgid ""
+"Last run: %1$s (%2$s ago). WP-Cron does not appear to be working correctly."
+msgstr "Dernière exécution : %1$s (il y a %2$s). WP-Cron ne semble pas fonctionner correctement."
+
+#: includes/heartbeat-monitor.php:134
+msgid "WP-Cron is disabled in wp-config.php"
+msgstr "WP-Cron est désactivé dans wp-config.php"
+
+#: includes/heartbeat-monitor.php:135
+msgid "Set up a real server cron or re-enable WP-Cron"
+msgstr "Configurez un vrai cron serveur ou réactivez WP-Cron"
+
+#: includes/heartbeat-monitor.php:145
+msgid "No scheduled task found"
+msgstr "Aucune tâche planifiée trouvée"
+
+#: includes/heartbeat-monitor.php:146
+msgid "Deactivate then reactivate the plugin"
+msgstr "Désactivez puis réactivez l'extension"
+
+#: includes/heartbeat-monitor.php:157
+msgid "Check that your site is receiving traffic, or set up a server cron"
+msgstr "Vérifiez que votre site reçoit du trafic, ou configurez un cron serveur"
+
+#. translators: %d: number of stuck tasks detected
+#: includes/heartbeat-monitor.php:179
+#, php-format
+msgid "%d stuck task(s) detected"
+msgstr "%d tâche(s) bloquée(s) détectée(s)"
+
+#: includes/heartbeat-monitor.php:182
+msgid "Run the automatic cleanup or restart the scheduler"
+msgstr "Lancez le nettoyage automatique ou redémarrez le planificateur"
+
+#. translators: %s: PHP memory_limit value, e.g. "64M"
+#: includes/heartbeat-monitor.php:200
+#, php-format
+msgid "Limited PHP memory: %s"
+msgstr "Mémoire PHP limitée : %s"
+
+#: includes/heartbeat-monitor.php:203
+msgid "Increase memory_limit to at least 128M in php.ini"
+msgstr "Augmentez memory_limit à au moins 128M dans php.ini"
+
+#. translators: %s: site name
+#: includes/heartbeat-monitor.php:245
+#, php-format
+msgid "[%s] Scheduler Pro: scheduler inactive"
+msgstr "[%s] Scheduler Pro : planificateur inactif"
+
+#. translators: 1: alert threshold in hours, 2: health description, 3: URL to the Monitoring tab
+#: includes/heartbeat-monitor.php:250
+#, php-format
+msgid ""
+"Scheduler Pro has not run in over %1$d hours.\n"
+"\n"
+"%2$s\n"
+"\n"
+"Check the Monitoring tab: %3$s"
+msgstr "Scheduler Pro ne s'est pas exécuté depuis plus de %1$d heures.\n\n%2$s\n\nConsultez l'onglet Monitoring : %3$s"
+
+#: includes/heartbeat-monitor.php:277 includes/admin/tab-monitoring.php:74
+msgid "Scheduler Status"
+msgstr "Statut du Planificateur"
+
+#: includes/heartbeat-monitor.php:279
+msgid "Status:"
+msgstr "Statut :"
+
+#: includes/heartbeat-monitor.php:284 includes/heartbeat-monitor.php:357
+#: includes/admin/tab-monitoring.php:91
+msgid "Next run:"
+msgstr "Prochaine exécution :"
+
+#. translators: %s: human-readable time until the next run, e.g. "3 hours"
+#: includes/heartbeat-monitor.php:289 includes/admin/tab-monitoring.php:96
+#, php-format
+msgid "(in %s)"
+msgstr "(dans %s)"
+
+#: includes/heartbeat-monitor.php:298 includes/admin/tab-monitoring.php:111
+msgid "Issues Detected"
+msgstr "Problèmes Détectés"
+
+#. translators: %s: suggested solution to the detected issue
+#: includes/heartbeat-monitor.php:307
+#, php-format
+msgid "Solution: %s"
+msgstr "Solution : %s"
+
+#: includes/heartbeat-monitor.php:322
+msgid "Guide: Set Up a Real Server Cron"
+msgstr "Guide : configurer un vrai cron serveur"
+
+#: includes/heartbeat-monitor.php:327
+msgid "Test WP-Cron"
+msgstr "Tester le WP-Cron"
+
+#: includes/heartbeat-monitor.php:368
+msgid "Cron Guide"
+msgstr "Guide Cron"
+
+#. translators: %d: number of posts scheduled by the manual test
+#: includes/heartbeat-monitor.php:395
+#, php-format
+msgid "Test succeeded! %d posts scheduled."
+msgstr "Test réussi ! %d articles planifiés."
+
+#. translators: %s: error message
+#: includes/heartbeat-monitor.php:404
+#, php-format
+msgid "Test failed: %s"
+msgstr "Test échoué : %s"
+
+#: includes/heartbeat-monitor.php:405 includes/admin/actions.php:63
+#: includes/admin/actions.php:90
+msgid "Unknown error"
+msgstr "Erreur inconnue"
+
+#: includes/heartbeat-monitor.php:413
+msgid "Scheduling function unavailable"
+msgstr "Fonction de planification indisponible"
+
+#: includes/heartbeat-monitor.php:423
+msgid "Scheduler Pro - Monitoring"
+msgstr "Scheduler Pro - Monitoring"
+
+#: includes/heartbeat-monitor.php:445
+msgid "Posts Awaiting Publication"
+msgstr "Articles en Attente de Publication"
+
+#: includes/heartbeat-monitor.php:450
+msgid "Cron Status"
+msgstr "Statut du Cron"
+
+#: includes/heartbeat-monitor.php:452
+msgid "OK"
+msgstr "OK"
+
+#: includes/heartbeat-monitor.php:452
+msgid "Issue"
+msgstr "Problème"
+
+#: includes/heartbeat-monitor.php:458
+msgid "Task Queue"
+msgstr "File de Tâches"
+
+#: includes/heartbeat-monitor.php:461
+msgid "Pending:"
+msgstr "En attente :"
+
+#: includes/heartbeat-monitor.php:464
+msgid "Running:"
+msgstr "En cours :"
+
+#: includes/heartbeat-monitor.php:467
+msgid "Completed:"
+msgstr "Terminées :"
+
+#: includes/heartbeat-monitor.php:470
+msgid "Failed:"
+msgstr "Échouées :"
+
+#: includes/heartbeat-monitor.php:479
+msgid "Go to Settings"
+msgstr "Aller aux réglages"
+
+#: includes/admin/menu.php:47
+msgid "Scheduler Running"
+msgstr "Planificateur Actif"
+
+#: includes/admin/menu.php:52
+msgid "Issue Detected"
+msgstr "Problème Détecté"
+
+#: includes/admin/menu.php:77 includes/admin/tab-logs.php:22
+msgid "Activity Log"
+msgstr "Journal d'Activité"
+
+#: includes/admin/menu.php:82
+msgid "About"
+msgstr "À propos"
+
+#: includes/admin/actions.php:40
+msgid "Settings saved successfully!"
+msgstr "Réglages enregistrés avec succès !"
+
+#. translators: %d: number of posts processed
+#: includes/admin/actions.php:53
+#, php-format
+msgid "Scheduling complete! %d posts processed."
+msgstr "Planification terminée ! %d articles traités."
+
+#. translators: %s: error message
+#: includes/admin/actions.php:62
+#, php-format
+msgid "Error while scheduling: %s"
+msgstr "Erreur lors de la planification : %s"
+
+#. translators: %d: number of posts that would be scheduled
+#: includes/admin/actions.php:80
+#, php-format
+msgid "Preview: %d post(s) would be scheduled. Nothing has been changed yet."
+msgstr "Aperçu : %d article(s) seraient planifiés. Rien n'a encore été modifié."
+
+#. translators: %s: error message
+#: includes/admin/actions.php:89
+#, php-format
+msgid "Error while building the preview: %s"
+msgstr "Erreur lors de la construction de l'aperçu : %s"
+
+#: includes/admin/actions.php:101
+msgid "Test complete."
+msgstr "Test terminé."
+
+#: includes/admin/meta-box.php:11
+msgid "Scheduler Pro: Locking"
+msgstr "Scheduler Pro : Verrouillage"
+
+#: includes/admin/meta-box.php:28
+msgid "Lock the publication date"
+msgstr "Verrouiller la date de publication"
+
+#: includes/admin/meta-box.php:31
+msgid "Prevents the Scheduler from automatically changing this post's date."
+msgstr "Empêche le Planificateur de modifier automatiquement la date de cet article."
+
+#: includes/admin/tab-about.php:18
+msgid "Advanced plugin for automatic, human-like WordPress post scheduling."
+msgstr "Extension avancée pour la planification automatique et humaine des articles WordPress."
+
+#: includes/admin/tab-about.php:19
+msgid ""
+"Designed to optimize your SEO publishing flow while keeping a natural "
+"appearance."
+msgstr "Conçue pour optimiser votre flux de publication SEO tout en gardant une apparence naturelle."
+
+#: includes/admin/tab-about.php:22
+msgid "What's New in v2.6"
+msgstr "Nouveautés de la v2.6"
+
+#: includes/admin/tab-about.php:24
+msgid "Flexible cadence"
+msgstr "Cadence flexible"
+
+#: includes/admin/tab-about.php:24
+msgid ""
+"schedule by day, week, or month (e.g. \"2/week\", \"6/month\"), not just "
+"posts/day"
+msgstr "planifiez par jour, semaine ou mois (ex. « 2/semaine », « 6/mois »), pas seulement articles/jour"
+
+#: includes/admin/tab-about.php:25
+msgid "keep entire categories out of auto-scheduling"
+msgstr "exclure des catégories entières de la planification automatique"
+
+#: includes/admin/tab-about.php:26
+msgid "see the exact resulting dates before committing anything"
+msgstr "voyez les dates exactes résultantes avant de valider quoi que ce soit"
+
+#: includes/admin/tab-about.php:27
+msgid "get notified if the scheduler stops running"
+msgstr "être notifié si le planificateur s'arrête"
+
+#: includes/admin/tab-about.php:28
+msgid "2-month day-by-day view of the upcoming schedule"
+msgstr "Vue jour par jour sur 2 mois du planning à venir"
+
+#: includes/admin/tab-about.php:31
+msgid "Core Features"
+msgstr "Fonctionnalités principales"
+
+#: includes/admin/tab-about.php:33
+msgid "Batch processing"
+msgstr "Traitement par lots"
+
+#: includes/admin/tab-about.php:33
+msgid "handles thousands of posts without timing out"
+msgstr "gère des milliers d’articles sans timeout"
+
+#: includes/admin/tab-about.php:34
+msgid "Memory management"
+msgstr "Gestion de la mémoire"
+
+#: includes/admin/tab-about.php:34
+msgid "stops automatically if RAM usage gets too high"
+msgstr "s'arrête automatiquement si l'utilisation de la RAM devient trop élevée"
+
+#: includes/admin/tab-about.php:35
+msgid "Locking system"
+msgstr "Système de verrouillage"
+
+#: includes/admin/tab-about.php:35
+msgid "prevents duplicate runs"
+msgstr "empêche les exécutions en double"
+
+#: includes/admin/tab-about.php:36
+msgid "Ultra-human generator"
+msgstr "Générateur ultra-humain"
+
+#: includes/admin/tab-about.php:36
+msgid "activity peaks at 9am, 2pm, 5pm"
+msgstr "pics d’activité à 9h, 14h, 17h"
+
+#: includes/admin/tab-about.php:37
+msgid "Real-time monitoring"
+msgstr "Monitoring en temps réel"
+
+#: includes/admin/tab-about.php:37
+msgid "watches system health"
+msgstr "surveille la santé du système"
+
+#: includes/admin/tab-about.php:38
+msgid "Task queue"
+msgstr "File de tâches"
+
+#: includes/admin/tab-about.php:38
+msgid "full traceability of every scheduling run"
+msgstr "traçabilité complète de chaque exécution de planification"
+
+#: includes/admin/tab-about.php:41
+msgid "Recommended Configuration"
+msgstr "Configuration Recommandée"
+
+#: includes/admin/tab-about.php:44
+msgid "Cadence:"
+msgstr "Cadence :"
+
+#: includes/admin/tab-about.php:45
+msgid ""
+"3-5/day (natural and SEO-friendly), or a week/month cadence for a lighter "
+"rhythm"
+msgstr "3-5/jour (naturel et adapté au SEO), ou une cadence semaine/mois pour un rythme plus léger"
+
+#: includes/admin/tab-about.php:48
+msgid "Time range:"
+msgstr "Plage horaire :"
+
+#: includes/admin/tab-about.php:49
+msgid "7am-8pm (human activity hours)"
+msgstr "7h-20h (heures d'activité humaine)"
+
+#: includes/admin/tab-about.php:52
+msgid "Auto mode:"
+msgstr "Mode automatique :"
+
+#: includes/admin/tab-about.php:53
+msgid "Enabled (runs daily at 00:30, site time)"
+msgstr "Activé (s'exécute chaque jour à 00h30, heure du site)"
+
+#: includes/admin/tab-about.php:56
+msgid "Server cron:"
+msgstr "Cron serveur :"
+
+#: includes/admin/tab-about.php:57
+msgid "Recommended for maximum reliability"
+msgstr "Recommandé pour une fiabilité maximale"
+
+#: includes/admin/tab-about.php:65
+msgid "Need Help?"
+msgstr "Besoin d'Aide ?"
+
+#: includes/admin/tab-about.php:69
+msgid "Documentation"
+msgstr "Documentation"
+
+#: includes/admin/tab-about.php:70
+msgid "Check the README file and guides bundled with the plugin."
+msgstr "Consultez le fichier README et les guides fournis avec l'extension."
+
+#: includes/admin/tab-about.php:74
+msgid "Report a Bug"
+msgstr "Signaler un Bug"
+
+#: includes/admin/tab-about.php:75
+msgid "Enable WordPress debug mode and check the logs."
+msgstr "Activez le mode débogage de WordPress et consultez les journaux."
+
+#: includes/admin/tab-about.php:80
+msgid "Performance"
+msgstr "Performance"
+
+#: includes/admin/tab-about.php:82
+msgid "Before v2.0:"
+msgstr "Avant v2.0 :"
+
+#: includes/admin/tab-about.php:82
+msgid "1000 posts = 50s (frequent timeouts)"
+msgstr "1000 articles = 50s (timeouts fréquents)"
+
+#: includes/admin/tab-about.php:83
+msgid "After v2.0:"
+msgstr "Après v2.0 :"
+
+#: includes/admin/tab-about.php:83
+msgid "1000 posts = 5s"
+msgstr "1000 articles = 5s"
+
+#. translators: %1$s: developer name (bold), %2$s: plugin version number
+#: includes/admin/tab-about.php:94
+#, php-format
+msgid "Developed by %1$s | Version %2$s"
+msgstr "Développé par %1$s | Version %2$s"
+
+#: includes/admin/tab-logs.php:36
+msgid "No activity recorded yet."
+msgstr "Aucune activité enregistrée pour le moment."
+
+#: includes/admin/tab-settings.php:14 includes/admin/tab-settings.php:78
+msgid "day"
+msgstr "jour"
+
+#: includes/admin/tab-settings.php:15 includes/admin/tab-settings.php:79
+msgid "week"
+msgstr "semaine"
+
+#: includes/admin/tab-settings.php:16 includes/admin/tab-settings.php:80
+msgid "month"
+msgstr "mois"
+
+#: includes/admin/tab-settings.php:52
+msgid "Strategy Simulator"
+msgstr "Simulateur de Stratégie"
+
+#. translators: %s: number of future posts, shown in bold
+#: includes/admin/tab-settings.php:59
+#, php-format
+msgid "%s posts awaiting scheduling"
+msgstr "%s articles en attente de planification"
+
+#: includes/admin/tab-settings.php:67 includes/admin/tab-settings.php:327
+msgid "Cadence"
+msgstr "Cadence"
+
+#: includes/admin/tab-settings.php:84
+msgid ""
+"Days/weeks are auto-distributed to keep publishing rhythm unpredictable."
+msgstr "Les jours/semaines sont répartis automatiquement pour garder un rythme de publication imprévisible."
+
+#: includes/admin/tab-settings.php:93
+msgid "Duration (Days)"
+msgstr "Durée (Jours)"
+
+#: includes/admin/tab-settings.php:109
+msgid "Schedule Configuration"
+msgstr "Configuration de la Planification"
+
+#: includes/admin/tab-settings.php:114
+msgid "Publishing time range"
+msgstr "Plage horaire de publication"
+
+#: includes/admin/tab-settings.php:116
+msgid "From"
+msgstr "De"
+
+#: includes/admin/tab-settings.php:123
+msgid "h to"
+msgstr "h à"
+
+#: includes/admin/tab-settings.php:133
+msgid "Recommended: 7am-8pm for natural-looking activity"
+msgstr "Recommandé : 7h-20h pour une activité d'apparence naturelle"
+
+#: includes/admin/tab-settings.php:141
+msgid "Skip weekends (Saturday & Sunday)"
+msgstr "Exclure les week-ends (samedi et dimanche)"
+
+#: includes/admin/tab-settings.php:146
+msgid "Automation"
+msgstr "Automatisation"
+
+#: includes/admin/tab-settings.php:152
+msgid "Enable automatic daily scheduling"
+msgstr "Activer la planification automatique quotidienne"
+
+#: includes/admin/tab-settings.php:155
+msgid "Runs daily at 00:30 via WP-Cron"
+msgstr "S'exécute chaque jour à 00h30 via WP-Cron"
+
+#: includes/admin/tab-settings.php:165
+msgid "Category Exclusion"
+msgstr "Exclusion de Catégories"
+
+#: includes/admin/tab-settings.php:168
+msgid "Categories never auto-scheduled"
+msgstr "Catégories jamais planifiées automatiquement"
+
+#: includes/admin/tab-settings.php:181
+msgid ""
+"Posts in a selected category are entirely skipped by the scheduler (Ctrl/Cmd-"
+"click to select several)."
+msgstr "Les articles d'une catégorie sélectionnée sont entièrement ignorés par le planificateur (Ctrl/Cmd-clic pour en sélectionner plusieurs)."
+
+#: includes/admin/tab-settings.php:189
+msgid "Email Alerts"
+msgstr "Alertes Email"
+
+#: includes/admin/tab-settings.php:197
+msgid "Email me if the scheduler stops running (no run for over 25h)"
+msgstr "M'envoyer un email si le planificateur s'arrête (aucune exécution depuis plus de 25h)"
+
+#: includes/admin/tab-settings.php:201
+msgid "Recipient (optional)"
+msgstr "Destinataire (optionnel)"
+
+#: includes/admin/tab-settings.php:210
+msgid ""
+"Leave empty to use the site's admin email. At most one alert every 24 hours."
+msgstr "Laissez vide pour utiliser l'email admin du site. Au maximum une alerte toutes les 24 heures."
+
+#: includes/admin/tab-settings.php:218
+msgid "\"Full Reset\" Mode"
+msgstr "Mode « Réinitialisation complète »"
+
+#: includes/admin/tab-settings.php:226
+msgid "Force reorganization of ALL future posts"
+msgstr "Forcer la réorganisation de TOUS les articles futurs"
+
+#: includes/admin/tab-settings.php:230
+msgid "Warning:"
+msgstr "Attention :"
+
+#: includes/admin/tab-settings.php:231
+msgid ""
+"This option will reorganize ALL your future posts starting tomorrow. Current "
+"dates will be overwritten. Automatically disables itself after running."
+msgstr "Cette option va réorganiser TOUS vos articles futurs à partir de demain. Les dates actuelles seront écrasées. Se désactive automatiquement après exécution."
+
+#: includes/admin/tab-settings.php:240
+msgid "Save Settings"
+msgstr "Enregistrer les Réglages"
+
+#: includes/admin/tab-settings.php:251
+msgid "Manual Run"
+msgstr "Exécution Manuelle"
+
+#: includes/admin/tab-settings.php:253
+msgid ""
+"Run the post scheduling immediately (without waiting for the daily cron), or "
+"preview the result first without changing anything."
+msgstr "Lance la planification des articles immédiatement (sans attendre le cron quotidien), ou prévisualise d'abord le résultat sans rien modifier."
+
+#: includes/admin/tab-settings.php:258
+msgid "Preview"
+msgstr "Aperçu"
+
+#: includes/admin/tab-settings.php:263
+msgid "Run Scheduling Now"
+msgstr "Lancer la Planification Maintenant"
+
+#: includes/admin/tab-settings.php:273
+msgid "Preview Result (not applied)"
+msgstr "Résultat de l'Aperçu (non appliqué)"
+
+#: includes/admin/tab-settings.php:277
+msgid "No post would be scheduled with the current settings."
+msgstr "Aucun article ne serait planifié avec les réglages actuels."
+
+#: includes/admin/tab-settings.php:282
+msgid "Post"
+msgstr "Article"
+
+#: includes/admin/tab-settings.php:283
+msgid "Current date"
+msgstr "Date actuelle"
+
+#: includes/admin/tab-settings.php:285
+msgid "New date"
+msgstr "Nouvelle date"
+
+#: includes/admin/tab-settings.php:291 includes/admin/tab-monitoring.php:307
+msgid "(no title)"
+msgstr "(sans titre)"
+
+#. translators: %d: number of additional posts not shown in the preview table
+#: includes/admin/tab-settings.php:304
+#, php-format
+msgid "%d more post(s) not shown here, but included in the total above."
+msgstr "%d article(s) supplémentaire(s) non affiché(s) ici, mais inclus dans le total ci-dessus."
+
+#: includes/admin/tab-settings.php:321
+msgid "Quick Stats"
+msgstr "Statistiques Rapides"
+
+#: includes/admin/tab-settings.php:323
+msgid "Future posts"
+msgstr "Articles futurs"
+
+#: includes/admin/tab-settings.php:331
+msgid "Estimated duration"
+msgstr "Durée estimée"
+
+#. translators: %d: estimated duration in days
+#: includes/admin/tab-settings.php:336
+#, php-format
+msgid "%d days"
+msgstr "%d jours"
+
+#: includes/admin/tab-settings.php:346
+msgid "Quick Help"
+msgstr "Aide Rapide"
+
+#: includes/admin/tab-settings.php:349
+msgid "Adhesive Mode:"
+msgstr "Mode Adhésif :"
+
+#: includes/admin/tab-settings.php:349
+msgid "New posts are added after the existing schedule"
+msgstr "Les nouveaux articles sont ajoutés à la suite du planning existant"
+
+#: includes/admin/tab-settings.php:352
+msgid "Full Reset Mode:"
+msgstr "Mode Réinitialisation complète :"
+
+#: includes/admin/tab-settings.php:352
+msgid "Everything is reorganized starting tomorrow"
+msgstr "Tout est réorganisé à partir de demain"
+
+#: includes/admin/tab-settings.php:355
+msgid "Locking:"
+msgstr "Verrouillage :"
+
+#: includes/admin/tab-settings.php:355
+msgid "Use the meta box on each post to lock its date"
+msgstr "Utilisez la meta box sur chaque article pour verrouiller sa date"
+
+#: includes/admin/tab-settings.php:371
+msgid "Result:"
+msgstr "Résultat :"
+
+#: includes/admin/tab-settings.php:372
+msgid "until"
+msgstr "jusqu'au"
+
+#: includes/admin/tab-monitoring.php:33
+msgid "Scheduled Posts"
+msgstr "Articles Planifiés"
+
+#: includes/admin/tab-monitoring.php:43
+msgid "Published Posts"
+msgstr "Articles Publiés"
+
+#: includes/admin/tab-monitoring.php:54
+msgid "Pending Tasks"
+msgstr "Tâches en Attente"
+
+#: includes/admin/tab-monitoring.php:64
+msgid "Failed Tasks"
+msgstr "Tâches Échouées"
+
+#: includes/admin/tab-monitoring.php:121
+msgid "Solution:"
+msgstr "Solution :"
+
+#: includes/admin/tab-monitoring.php:172
+msgid "Distribution Over the Next 3 Months (by week)"
+msgstr "Répartition sur les 3 prochains mois (par semaine)"
+
+#. translators: 1: post count, 2: week start date (d/m), 3: week end date (d/m)
+#: includes/admin/tab-monitoring.php:185
+#, php-format
+msgid "%1$d posts (%2$s - %3$s)"
+msgstr "%1$d articles (%2$s - %3$s)"
+
+#: includes/admin/tab-monitoring.php:237
+msgid "Calendar View"
+msgstr "Vue Calendrier"
+
+#: includes/admin/tab-monitoring.php:271
+msgid "Mon"
+msgstr "Lun"
+
+#: includes/admin/tab-monitoring.php:272
+msgid "Tue"
+msgstr "Mar"
+
+#: includes/admin/tab-monitoring.php:273
+msgid "Wed"
+msgstr "Mer"
+
+#: includes/admin/tab-monitoring.php:274
+msgid "Thu"
+msgstr "Jeu"
+
+#: includes/admin/tab-monitoring.php:275
+msgid "Fri"
+msgstr "Ven"
+
+#: includes/admin/tab-monitoring.php:276
+msgid "Sat"
+msgstr "Sam"
+
+#: includes/admin/tab-monitoring.php:277
+msgid "Sun"
+msgstr "Dim"
+
+#. translators: %d: number of additional posts on that day not shown in the tooltip
+#: includes/admin/tab-monitoring.php:314
+#, php-format
+msgid "%d more…"
+msgstr "%d de plus…"

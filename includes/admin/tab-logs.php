@@ -19,7 +19,7 @@ function sp_render_logs_tab() {
         <div class="sp-logs-header">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-media-text"></span>
-                Activity Log
+                <?php esc_html_e('Activity Log', 'scheduler-pro'); ?>
             </h2>
             <div class="sp-logs-info">
                 <span class="sp-badge">scheduler-pro.log</span>
@@ -33,7 +33,7 @@ function sp_render_logs_tab() {
 
         <div class="sp-logs-container">
             <?php if (empty($logs)): ?>
-                <p class="sp-no-logs">No activity recorded yet.</p>
+                <p class="sp-no-logs"><?php esc_html_e('No activity recorded yet.', 'scheduler-pro'); ?></p>
             <?php else: ?>
                 <?php foreach ($logs as $line): ?>
                     <?php

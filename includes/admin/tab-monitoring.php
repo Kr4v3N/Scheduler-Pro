@@ -30,7 +30,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $total_future; ?></div>
-                    <div class="sp-stat-label">Scheduled Posts</div>
+                    <div class="sp-stat-label"><?php esc_html_e('Scheduled Posts', 'scheduler-pro'); ?></div>
                 </div>
             </div>
 
@@ -40,7 +40,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $total_publish; ?></div>
-                    <div class="sp-stat-label">Published Posts</div>
+                    <div class="sp-stat-label"><?php esc_html_e('Published Posts', 'scheduler-pro'); ?></div>
                 </div>
             </div>
 
@@ -51,7 +51,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $queue_stats['pending'] ?? 0; ?></div>
-                    <div class="sp-stat-label">Pending Tasks</div>
+                    <div class="sp-stat-label"><?php esc_html_e('Pending Tasks', 'scheduler-pro'); ?></div>
                 </div>
             </div>
 
@@ -61,7 +61,7 @@ function sp_render_monitoring_tab() {
                 </div>
                 <div class="sp-stat-content">
                     <div class="sp-stat-value"><?php echo $queue_stats['failed'] ?? 0; ?></div>
-                    <div class="sp-stat-label">Failed Tasks</div>
+                    <div class="sp-stat-label"><?php esc_html_e('Failed Tasks', 'scheduler-pro'); ?></div>
                 </div>
             </div>
             <?php endif; ?>
@@ -71,7 +71,7 @@ function sp_render_monitoring_tab() {
         <div class="sp-card">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-heart"></span>
-                Scheduler Status
+                <?php esc_html_e('Scheduler Status', 'scheduler-pro'); ?>
             </h2>
 
             <div class="sp-health-status sp-health-<?php echo $health['level']; ?>">
@@ -88,9 +88,15 @@ function sp_render_monitoring_tab() {
 
                     <?php if ($next): ?>
                         <p class="sp-next-run">
-                            <strong>Next run:</strong>
+                            <strong><?php esc_html_e('Next run:', 'scheduler-pro'); ?></strong>
                             <?php echo esc_html($next['date']); ?>
-                            (in <?php echo esc_html($next['human']); ?>)
+                            <?php
+                            printf(
+                                /* translators: %s: human-readable time until the next run, e.g. "3 hours" */
+                                esc_html__('(in %s)', 'scheduler-pro'),
+                                esc_html($next['human'])
+                            );
+                            ?>
                         </p>
                     <?php endif; ?>
                 </div>
@@ -102,7 +108,7 @@ function sp_render_monitoring_tab() {
         <div class="sp-card sp-card-warning">
             <h2 class="sp-card-title">
                 <span class="dashicons dashicons-flag"></span>
-                Issues Detected
+                <?php esc_html_e('Issues Detected', 'scheduler-pro'); ?>
             </h2>
 
             <?php foreach ($issues as $issue): ?>
@@ -112,7 +118,7 @@ function sp_render_monitoring_tab() {
                     </div>
                     <div class="sp-issue-content">
                         <h4><?php echo esc_html($issue['message']); ?></h4>
-                        <p><strong>Solution:</strong> <?php echo esc_html($issue['solution']); ?></p>
+                        <p><strong><?php esc_html_e('Solution:', 'scheduler-pro'); ?></strong> <?php echo esc_html($issue['solution']); ?></p>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -163,7 +169,7 @@ function sp_render_distribution_chart() {
     <div class="sp-card">
         <h2 class="sp-card-title">
             <span class="dashicons dashicons-chart-bar"></span>
-            Distribution Over the Next 3 Months (by week)
+            <?php esc_html_e('Distribution Over the Next 3 Months (by week)', 'scheduler-pro'); ?>
         </h2>
 
         <div class="sp-distribution-chart">
@@ -173,7 +179,16 @@ function sp_render_distribution_chart() {
                 $week_start = new DateTime($week['week_start']);
                 $week_end = (clone $week_start)->modify('+6 days');
                 ?>
-                <div class="sp-chart-bar" title="<?php echo esc_attr($week['count']); ?> posts (<?php echo esc_attr($week_start->format('d/m')); ?> - <?php echo esc_attr($week_end->format('d/m')); ?>)">
+                <?php
+                $bar_title = sprintf(
+                    /* translators: 1: post count, 2: week start date (d/m), 3: week end date (d/m) */
+                    __('%1$d posts (%2$s - %3$s)', 'scheduler-pro'),
+                    $week['count'],
+                    $week_start->format('d/m'),
+                    $week_end->format('d/m')
+                );
+                ?>
+                <div class="sp-chart-bar" title="<?php echo esc_attr($bar_title); ?>">
                     <div class="sp-chart-bar-fill" style="height: <?php echo $percentage; ?>%;"></div>
                     <div class="sp-chart-bar-label">
                         <?php echo $week_start->format('d/m'); ?>
@@ -219,7 +234,7 @@ function sp_render_calendar_view() {
     <div class="sp-card">
         <h2 class="sp-card-title">
             <span class="dashicons dashicons-calendar"></span>
-            Calendar View
+            <?php esc_html_e('Calendar View', 'scheduler-pro'); ?>
         </h2>
 
         <div class="sp-calendar">
@@ -249,10 +264,21 @@ function sp_render_calendar_month($month_start, $titles_by_date, $today) {
 
     ?>
     <div class="sp-calendar-month">
-        <h3 class="sp-calendar-month-title"><?php echo esc_html($month_start->format('F Y')); ?></h3>
+        <h3 class="sp-calendar-month-title"><?php echo esc_html(date_i18n('F Y', strtotime($month_start->format('Y-m-d')))); ?></h3>
         <div class="sp-calendar-grid">
-            <?php foreach (array('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun') as $weekday_label): ?>
-                <div class="sp-calendar-weekday"><?php echo $weekday_label; ?></div>
+            <?php
+            $weekday_labels = array(
+                __('Mon', 'scheduler-pro'),
+                __('Tue', 'scheduler-pro'),
+                __('Wed', 'scheduler-pro'),
+                __('Thu', 'scheduler-pro'),
+                __('Fri', 'scheduler-pro'),
+                __('Sat', 'scheduler-pro'),
+                __('Sun', 'scheduler-pro'),
+            );
+            ?>
+            <?php foreach ($weekday_labels as $weekday_label): ?>
+                <div class="sp-calendar-weekday"><?php echo esc_html($weekday_label); ?></div>
             <?php endforeach; ?>
 
             <?php for ($i = 1; $i < $first_weekday; $i++): ?>
@@ -278,10 +304,18 @@ function sp_render_calendar_month($month_start, $titles_by_date, $today) {
                             <strong><?php echo esc_html(date_i18n('D d M', strtotime($date_key))); ?></strong>
                             <ul>
                                 <?php foreach (array_slice($titles, 0, 8) as $title): ?>
-                                    <li><?php echo esc_html($title !== '' ? $title : '(no title)'); ?></li>
+                                    <li><?php echo esc_html($title !== '' ? $title : __('(no title)', 'scheduler-pro')); ?></li>
                                 <?php endforeach; ?>
                                 <?php if ($count > 8): ?>
-                                    <li><?php echo ($count - 8); ?> more…</li>
+                                    <li>
+                                        <?php
+                                        printf(
+                                            /* translators: %d: number of additional posts on that day not shown in the tooltip */
+                                            esc_html__('%d more…', 'scheduler-pro'),
+                                            $count - 8
+                                        );
+                                        ?>
+                                    </li>
                                 <?php endif; ?>
                             </ul>
                         </div>

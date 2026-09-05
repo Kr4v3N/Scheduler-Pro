@@ -27,8 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 : this.querySelector('.button-hero');
             if (btn) {
                 const originalText = btn.innerHTML;
+                const processingLabel = (typeof spData !== 'undefined' && spData.i18n && spData.i18n.processing)
+                    ? spData.i18n.processing
+                    : 'Processing...';
                 btn.style.width = btn.offsetWidth + 'px'; // Keep the width
-                btn.innerHTML = '<span class="dashicons dashicons-update sp-spin"></span> Processing...';
+                btn.innerHTML = '<span class="dashicons dashicons-update sp-spin"></span> ' + processingLabel;
                 btn.style.opacity = '0.7';
                 btn.style.pointerEvents = 'none';
             }

@@ -37,7 +37,7 @@ function sp_handle_admin_actions() {
         $alert_email = isset($_POST['sp_alert_email']) ? sanitize_email(wp_unslash($_POST['sp_alert_email'])) : '';
         update_option('sp_alert_email', $alert_email);
 
-        $message = array('type' => 'success', 'text' => '✅ Settings saved successfully!');
+        $message = array('type' => 'success', 'text' => '✅ ' . __('Settings saved successfully!', 'scheduler-pro'));
     }
 
     if (isset($_POST['sp_run_now'])) {
@@ -48,12 +48,20 @@ function sp_handle_admin_actions() {
         if ($result && $result['success']) {
             $message = array(
                 'type' => 'success',
-                'text' => "✅ Scheduling complete! {$result['processed']} posts processed."
+                'text' => '✅ ' . sprintf(
+                    /* translators: %d: number of posts processed */
+                    __('Scheduling complete! %d posts processed.', 'scheduler-pro'),
+                    $result['processed']
+                )
             );
         } else {
             $message = array(
                 'type' => 'error',
-                'text' => "❌ Error while scheduling: " . ($result['message'] ?? 'Unknown error')
+                'text' => '❌ ' . sprintf(
+                    /* translators: %s: error message */
+                    __('Error while scheduling: %s', 'scheduler-pro'),
+                    $result['message'] ?? __('Unknown error', 'scheduler-pro')
+                )
             );
         }
     }
@@ -67,12 +75,20 @@ function sp_handle_admin_actions() {
             $preview = $result['preview'];
             $message = array(
                 'type' => 'success',
-                'text' => "👁️ Preview: {$result['processed']} post(s) would be scheduled. Nothing has been changed yet."
+                'text' => '👁️ ' . sprintf(
+                    /* translators: %d: number of posts that would be scheduled */
+                    __('Preview: %d post(s) would be scheduled. Nothing has been changed yet.', 'scheduler-pro'),
+                    $result['processed']
+                )
             );
         } else {
             $message = array(
                 'type' => 'error',
-                'text' => "❌ Error while building the preview: " . ($result['message'] ?? 'Unknown error')
+                'text' => '❌ ' . sprintf(
+                    /* translators: %s: error message */
+                    __('Error while building the preview: %s', 'scheduler-pro'),
+                    $result['message'] ?? __('Unknown error', 'scheduler-pro')
+                )
             );
         }
     }
@@ -82,7 +98,7 @@ function sp_handle_admin_actions() {
     if (isset($_GET['test_result']) && isset($_GET['page']) && $_GET['page'] === 'scheduler-pro') {
         $message = array(
             'type' => $_GET['test_result'] === 'success' ? 'success' : 'error',
-            'text' => isset($_GET['test_message']) ? sanitize_text_field(wp_unslash($_GET['test_message'])) : 'Test complete.',
+            'text' => isset($_GET['test_message']) ? sanitize_text_field(wp_unslash($_GET['test_message'])) : __('Test complete.', 'scheduler-pro'),
         );
     }
 

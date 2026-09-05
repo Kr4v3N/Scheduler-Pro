@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) exit;
 add_action('add_meta_boxes', function() {
     add_meta_box(
         'sp_lock_date_box',
-        '🔒 Scheduler Pro: Locking',
+        '🔒 ' . __('Scheduler Pro: Locking', 'scheduler-pro'),
         'sp_render_lock_meta_box',
         'post',
         'side',
@@ -25,10 +25,10 @@ function sp_render_lock_meta_box($post) {
                name="sp_lock_planning"
                value="1"
                <?php checked($value, '1'); ?>>
-        <strong>Lock the publication date</strong>
+        <strong><?php esc_html_e('Lock the publication date', 'scheduler-pro'); ?></strong>
     </label>
     <p class="description">
-        Prevents the Scheduler from automatically changing this post's date.
+        <?php esc_html_e("Prevents the Scheduler from automatically changing this post's date.", 'scheduler-pro'); ?>
     </p>
     <?php
 }

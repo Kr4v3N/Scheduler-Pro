@@ -49,23 +49,24 @@ class SP_Heartbeat_Monitor {
             return array(
                 'status' => 'unknown',
                 'level' => 'warning',
-                'message' => 'No run recorded',
-                'description' => 'The scheduler has never run yet, or was just installed.',
+                'message' => __('No run recorded', 'scheduler-pro'),
+                'description' => __('The scheduler has never run yet, or was just installed.', 'scheduler-pro'),
                 'action' => null
             );
         }
 
         $hours_since_last_run = (time() - $last_run) / 3600;
-        $last_run_date = get_option('sp_last_cron_date', 'Unknown');
+        $last_run_date = get_option('sp_last_cron_date', __('Unknown', 'scheduler-pro'));
 
         // OK status (< 25h)
         if ($hours_since_last_run < self::ALERT_THRESHOLD_HOURS) {
             return array(
                 'status' => 'healthy',
                 'level' => 'success',
-                'message' => 'Scheduler running normally',
+                'message' => __('Scheduler running normally', 'scheduler-pro'),
                 'description' => sprintf(
-                    'Last run: %s (%s ago)',
+                    /* translators: 1: last run date/time, 2: human-readable time elapsed since then */
+                    __('Last run: %1$s (%2$s ago)', 'scheduler-pro'),
                     $last_run_date,
                     human_time_diff($last_run, time())
                 ),
@@ -77,9 +78,10 @@ class SP_Heartbeat_Monitor {
         return array(
             'status' => 'critical',
             'level' => 'error',
-            'message' => '⚠️ Scheduler inactive!',
+            'message' => '⚠️ ' . __('Scheduler inactive!', 'scheduler-pro'),
             'description' => sprintf(
-                'Last run: %s (%s ago). WP-Cron does not appear to be working correctly.',
+                /* translators: 1: last run date/time, 2: human-readable time elapsed since then */
+                __('Last run: %1$s (%2$s ago). WP-Cron does not appear to be working correctly.', 'scheduler-pro'),
                 $last_run_date,
                 human_time_diff($last_run, time())
             ),
@@ -129,8 +131,8 @@ class SP_Heartbeat_Monitor {
             $issues[] = array(
                 'type' => 'wp_cron_disabled',
                 'severity' => 'critical',
-                'message' => 'WP-Cron is disabled in wp-config.php',
-                'solution' => 'Set up a real server cron or re-enable WP-Cron',
+                'message' => __('WP-Cron is disabled in wp-config.php', 'scheduler-pro'),
+                'solution' => __('Set up a real server cron or re-enable WP-Cron', 'scheduler-pro'),
             );
         }
 
@@ -140,8 +142,8 @@ class SP_Heartbeat_Monitor {
             $issues[] = array(
                 'type' => 'no_cron_scheduled',
                 'severity' => 'critical',
-                'message' => 'No scheduled task found',
-                'solution' => 'Deactivate then reactivate the plugin',
+                'message' => __('No scheduled task found', 'scheduler-pro'),
+                'solution' => __('Deactivate then reactivate the plugin', 'scheduler-pro'),
             );
         }
 
@@ -152,7 +154,7 @@ class SP_Heartbeat_Monitor {
                 'type' => 'cron_not_running',
                 'severity' => 'critical',
                 'message' => $health['message'],
-                'solution' => 'Check that your site is receiving traffic, or set up a server cron',
+                'solution' => __('Check that your site is receiving traffic, or set up a server cron', 'scheduler-pro'),
             );
         }
 
@@ -172,8 +174,12 @@ class SP_Heartbeat_Monitor {
                 $issues[] = array(
                     'type' => 'stuck_tasks',
                     'severity' => 'warning',
-                    'message' => "{$stuck_tasks} stuck task(s) detected",
-                    'solution' => 'Run the automatic cleanup or restart the scheduler',
+                    'message' => sprintf(
+                        /* translators: %d: number of stuck tasks detected */
+                        __('%d stuck task(s) detected', 'scheduler-pro'),
+                        $stuck_tasks
+                    ),
+                    'solution' => __('Run the automatic cleanup or restart the scheduler', 'scheduler-pro'),
                 );
             }
         }
@@ -189,8 +195,12 @@ class SP_Heartbeat_Monitor {
             $issues[] = array(
                 'type' => 'low_memory',
                 'severity' => 'warning',
-                'message' => "Limited PHP memory: {$memory_limit}",
-                'solution' => 'Increase memory_limit to at least 128M in php.ini',
+                'message' => sprintf(
+                    /* translators: %s: PHP memory_limit value, e.g. "64M" */
+                    __('Limited PHP memory: %s', 'scheduler-pro'),
+                    $memory_limit
+                ),
+                'solution' => __('Increase memory_limit to at least 128M in php.ini', 'scheduler-pro'),
             );
         }
 
@@ -230,9 +240,14 @@ class SP_Heartbeat_Monitor {
             $to = get_option('admin_email');
         }
 
-        $subject = sprintf('[%s] Scheduler Pro: scheduler inactive', get_bloginfo('name'));
+        $subject = sprintf(
+            /* translators: %s: site name */
+            __('[%s] Scheduler Pro: scheduler inactive', 'scheduler-pro'),
+            get_bloginfo('name')
+        );
         $body = sprintf(
-            "Scheduler Pro has not run in over %d hours.\n\n%s\n\nCheck the Monitoring tab: %s",
+            /* translators: 1: alert threshold in hours, 2: health description, 3: URL to the Monitoring tab */
+            __("Scheduler Pro has not run in over %1\$d hours.\n\n%2\$s\n\nCheck the Monitoring tab: %3\$s", 'scheduler-pro'),
             self::ALERT_THRESHOLD_HOURS,
             $health['description'],
             admin_url('admin.php?page=scheduler-pro&tab=monitoring')
@@ -259,27 +274,41 @@ class SP_Heartbeat_Monitor {
         $notice_class = 'notice-' . $health['level'];
         ?>
         <div class="notice <?php echo esc_attr($notice_class); ?> is-dismissible">
-            <h3 style="margin: 10px 0;">💓 Scheduler Status</h3>
+            <h3 style="margin: 10px 0;">💓 <?php esc_html_e('Scheduler Status', 'scheduler-pro'); ?></h3>
 
-            <p><strong>Status:</strong> <?php echo esc_html($health['message']); ?></p>
+            <p><strong><?php esc_html_e('Status:', 'scheduler-pro'); ?></strong> <?php echo esc_html($health['message']); ?></p>
             <p><?php echo esc_html($health['description']); ?></p>
 
             <?php if ($next): ?>
                 <p>
-                    <strong>Next run:</strong>
+                    <strong><?php esc_html_e('Next run:', 'scheduler-pro'); ?></strong>
                     <?php echo esc_html($next['date']); ?>
-                    (in <?php echo esc_html($next['human']); ?>)
+                    <?php
+                    printf(
+                        /* translators: %s: human-readable time until the next run, e.g. "3 hours" */
+                        esc_html__('(in %s)', 'scheduler-pro'),
+                        esc_html($next['human'])
+                    );
+                    ?>
                 </p>
             <?php endif; ?>
 
             <?php if (!empty($issues)): ?>
                 <hr style="margin: 15px 0;">
-                <h4 style="margin: 10px 0;">⚠️ Issues Detected</h4>
+                <h4 style="margin: 10px 0;">⚠️ <?php esc_html_e('Issues Detected', 'scheduler-pro'); ?></h4>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <?php foreach ($issues as $issue): ?>
                         <li>
                             <strong><?php echo esc_html($issue['message']); ?></strong><br>
-                            <em>Solution: <?php echo esc_html($issue['solution']); ?></em>
+                            <em>
+                                <?php
+                                printf(
+                                    /* translators: %s: suggested solution to the detected issue */
+                                    esc_html__('Solution: %s', 'scheduler-pro'),
+                                    esc_html($issue['solution'])
+                                );
+                                ?>
+                            </em>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -290,12 +319,12 @@ class SP_Heartbeat_Monitor {
                     <a href="https://developer.wordpress.org/plugins/cron/hooking-wp-cron-into-the-system-task-scheduler/"
                        target="_blank"
                        class="button button-primary">
-                        📖 Guide: Set Up a Real Server Cron
+                        📖 <?php esc_html_e('Guide: Set Up a Real Server Cron', 'scheduler-pro'); ?>
                     </a>
 
                     <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=scheduler-pro&action=test_cron'), 'sp_test_cron_nonce')); ?>"
                        class="button">
-                        🔧 Test WP-Cron
+                        🔧 <?php esc_html_e('Test WP-Cron', 'scheduler-pro'); ?>
                     </a>
                 </p>
             <?php endif; ?>
@@ -325,7 +354,7 @@ class SP_Heartbeat_Monitor {
                     </p>
                     <?php if ($next): ?>
                         <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">
-                            <strong>Next run:</strong> <?php echo esc_html($next['date']); ?>
+                            <strong><?php esc_html_e('Next run:', 'scheduler-pro'); ?></strong> <?php echo esc_html($next['date']); ?>
                         </p>
                     <?php endif; ?>
                 </div>
@@ -336,7 +365,7 @@ class SP_Heartbeat_Monitor {
                            target="_blank"
                            class="button button-small"
                            style="white-space: nowrap;">
-                            📖 Cron Guide
+                            📖 <?php esc_html_e('Cron Guide', 'scheduler-pro'); ?>
                         </a>
                     </div>
                 <?php endif; ?>
@@ -361,19 +390,27 @@ class SP_Heartbeat_Monitor {
             if ($result && $result['success']) {
                 return array(
                     'success' => true,
-                    'message' => "Test succeeded! {$result['processed']} posts scheduled."
+                    'message' => sprintf(
+                        /* translators: %d: number of posts scheduled by the manual test */
+                        __('Test succeeded! %d posts scheduled.', 'scheduler-pro'),
+                        $result['processed']
+                    )
                 );
             } else {
                 return array(
                     'success' => false,
-                    'message' => "Test failed: " . ($result['message'] ?? 'Unknown error')
+                    'message' => sprintf(
+                        /* translators: %s: error message */
+                        __('Test failed: %s', 'scheduler-pro'),
+                        $result['message'] ?? __('Unknown error', 'scheduler-pro')
+                    )
                 );
             }
         }
 
         return array(
             'success' => false,
-            'message' => 'Scheduling function unavailable'
+            'message' => __('Scheduling function unavailable', 'scheduler-pro')
         );
     }
 
@@ -383,7 +420,7 @@ class SP_Heartbeat_Monitor {
     public static function add_dashboard_widget() {
         wp_add_dashboard_widget(
             'sp_heartbeat_dashboard',
-            '💓 Scheduler Pro - Monitoring',
+            '💓 ' . __('Scheduler Pro - Monitoring', 'scheduler-pro'),
             array('SP_Heartbeat_Monitor', 'render_dashboard_content')
         );
     }
@@ -405,32 +442,32 @@ class SP_Heartbeat_Monitor {
         ?>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
             <div style="padding: 15px; background: #f0f6fb; border-radius: 8px; text-align: center;">
-                <h4 style="margin: 0 0 5px 0; color: #2271b1;">Posts Awaiting Publication</h4>
+                <h4 style="margin: 0 0 5px 0; color: #2271b1;"><?php esc_html_e('Posts Awaiting Publication', 'scheduler-pro'); ?></h4>
                 <p style="font-size: 32px; margin: 0; font-weight: bold;"><?php echo esc_html($total_scheduled); ?></p>
             </div>
 
             <div style="padding: 15px; background: <?php echo $health['level'] === 'success' ? '#d4edda' : '#f8d7da'; ?>; border-radius: 8px; text-align: center;">
-                <h4 style="margin: 0 0 5px 0;">Cron Status</h4>
+                <h4 style="margin: 0 0 5px 0;"><?php esc_html_e('Cron Status', 'scheduler-pro'); ?></h4>
                 <p style="font-size: 24px; margin: 0; font-weight: bold;">
-                    <?php echo $health['level'] === 'success' ? '✅ OK' : '❌ Issue'; ?>
+                    <?php echo $health['level'] === 'success' ? '✅ ' . esc_html__('OK', 'scheduler-pro') : '❌ ' . esc_html__('Issue', 'scheduler-pro'); ?>
                 </p>
             </div>
 
             <?php if (!empty($stats)): ?>
                 <div style="grid-column: span 2; padding: 15px; background: #fff3cd; border-radius: 8px;">
-                    <h4 style="margin: 0 0 10px 0;">📊 Task Queue</h4>
+                    <h4 style="margin: 0 0 10px 0;">📊 <?php esc_html_e('Task Queue', 'scheduler-pro'); ?></h4>
                     <div style="display: flex; justify-content: space-around;">
                         <div>
-                            <strong>Pending:</strong> <?php echo esc_html($stats['pending']); ?>
+                            <strong><?php esc_html_e('Pending:', 'scheduler-pro'); ?></strong> <?php echo esc_html($stats['pending']); ?>
                         </div>
                         <div>
-                            <strong>Running:</strong> <?php echo esc_html($stats['running']); ?>
+                            <strong><?php esc_html_e('Running:', 'scheduler-pro'); ?></strong> <?php echo esc_html($stats['running']); ?>
                         </div>
                         <div>
-                            <strong>Completed:</strong> <?php echo esc_html($stats['completed']); ?>
+                            <strong><?php esc_html_e('Completed:', 'scheduler-pro'); ?></strong> <?php echo esc_html($stats['completed']); ?>
                         </div>
                         <div>
-                            <strong>Failed:</strong> <?php echo esc_html($stats['failed']); ?>
+                            <strong><?php esc_html_e('Failed:', 'scheduler-pro'); ?></strong> <?php echo esc_html($stats['failed']); ?>
                         </div>
                     </div>
                 </div>
@@ -439,7 +476,7 @@ class SP_Heartbeat_Monitor {
 
         <p style="text-align: center; margin-top: 15px;">
             <a href="<?php echo admin_url('admin.php?page=scheduler-pro'); ?>" class="button button-primary">
-                ⚙️ Go to Settings
+                ⚙️ <?php esc_html_e('Go to Settings', 'scheduler-pro'); ?>
             </a>
         </p>
         <?php
@@ -484,7 +521,7 @@ add_action('admin_notices', function() {
 add_action('admin_init', function() {
     if (isset($_GET['action']) && $_GET['action'] === 'test_cron' && isset($_GET['page']) && $_GET['page'] === 'scheduler-pro') {
         if (!current_user_can('manage_options')) {
-            wp_die('Access denied');
+            wp_die(esc_html__('Access denied', 'scheduler-pro'));
         }
 
         check_admin_referer('sp_test_cron_nonce');

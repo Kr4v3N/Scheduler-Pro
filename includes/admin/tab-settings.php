@@ -10,6 +10,11 @@ function sp_render_settings_tab($preview = null) {
     if (!in_array($cadence_unit, array('day', 'week', 'month'), true)) {
         $cadence_unit = 'day';
     }
+    $cadence_unit_labels = array(
+        'day' => __('day', 'scheduler-pro'),
+        'week' => __('week', 'scheduler-pro'),
+        'month' => __('month', 'scheduler-pro'),
+    );
     $cadence_count = (int) get_option('sp_cadence_count', get_option('sp_posts_per_day', 3));
     $start_hour = get_option('sp_start_hour', 7);
     $end_hour = get_option('sp_end_hour', 20);
@@ -44,16 +49,22 @@ function sp_render_settings_tab($preview = null) {
                 <div class="sp-card">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-calculator"></span>
-                        Strategy Simulator
+                        <?php esc_html_e('Strategy Simulator', 'scheduler-pro'); ?>
                     </h2>
 
                     <div class="sp-info-box">
-                        <strong><?php echo $total_future; ?></strong> posts awaiting scheduling
+                        <?php
+                        printf(
+                            /* translators: %s: number of future posts, shown in bold */
+                            esc_html__('%s posts awaiting scheduling', 'scheduler-pro'),
+                            '<strong>' . esc_html($total_future) . '</strong>'
+                        );
+                        ?>
                     </div>
 
                     <div class="sp-simulator">
                         <div class="sp-sim-input">
-                            <label>Cadence</label>
+                            <label><?php esc_html_e('Cadence', 'scheduler-pro'); ?></label>
                             <div class="sp-cadence-input">
                                 <input type="number"
                                        id="sp_cadence_count"
@@ -64,13 +75,13 @@ function sp_render_settings_tab($preview = null) {
                                        class="sp-input-number">
                                 <span>/</span>
                                 <select id="sp_cadence_unit" name="sp_cadence_unit" class="sp-input-select">
-                                    <option value="day" <?php selected($cadence_unit, 'day'); ?>>day</option>
-                                    <option value="week" <?php selected($cadence_unit, 'week'); ?>>week</option>
-                                    <option value="month" <?php selected($cadence_unit, 'month'); ?>>month</option>
+                                    <option value="day" <?php selected($cadence_unit, 'day'); ?>><?php esc_html_e('day', 'scheduler-pro'); ?></option>
+                                    <option value="week" <?php selected($cadence_unit, 'week'); ?>><?php esc_html_e('week', 'scheduler-pro'); ?></option>
+                                    <option value="month" <?php selected($cadence_unit, 'month'); ?>><?php esc_html_e('month', 'scheduler-pro'); ?></option>
                                 </select>
                             </div>
                             <p class="sp-help-text">
-                                Days/weeks are auto-distributed to keep publishing rhythm unpredictable.
+                                <?php esc_html_e('Days/weeks are auto-distributed to keep publishing rhythm unpredictable.', 'scheduler-pro'); ?>
                             </p>
                         </div>
 
@@ -79,7 +90,7 @@ function sp_render_settings_tab($preview = null) {
                         </div>
 
                         <div class="sp-sim-output">
-                            <label>Duration (Days)</label>
+                            <label><?php esc_html_e('Duration (Days)', 'scheduler-pro'); ?></label>
                             <input type="number"
                                    id="sp_duration_input"
                                    value="<?php echo ceil($total_future * $interval_days); ?>"
@@ -95,21 +106,21 @@ function sp_render_settings_tab($preview = null) {
                 <div class="sp-card">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-clock"></span>
-                        Schedule Configuration
+                        <?php esc_html_e('Schedule Configuration', 'scheduler-pro'); ?>
                     </h2>
 
                     <div class="sp-form-row">
                         <div class="sp-form-col">
-                            <label class="sp-label">Publishing time range</label>
+                            <label class="sp-label"><?php esc_html_e('Publishing time range', 'scheduler-pro'); ?></label>
                             <div class="sp-time-range">
-                                <span>From</span>
+                                <span><?php esc_html_e('From', 'scheduler-pro'); ?></span>
                                 <input type="number"
                                        name="sp_start_hour"
                                        value="<?php echo $start_hour; ?>"
                                        min="0"
                                        max="23"
                                        class="sp-input-time">
-                                <span>h to</span>
+                                <span><?php esc_html_e('h to', 'scheduler-pro'); ?></span>
                                 <input type="number"
                                        name="sp_end_hour"
                                        value="<?php echo $end_hour; ?>"
@@ -119,7 +130,7 @@ function sp_render_settings_tab($preview = null) {
                                 <span>h</span>
                             </div>
                             <p class="sp-help-text">
-                                Recommended: 7am-8pm for natural-looking activity
+                                <?php esc_html_e('Recommended: 7am-8pm for natural-looking activity', 'scheduler-pro'); ?>
                             </p>
 
                             <label class="sp-checkbox-label">
@@ -127,21 +138,21 @@ function sp_render_settings_tab($preview = null) {
                                        name="sp_skip_weekends"
                                        value="1"
                                        <?php checked($skip_weekends, '1'); ?>>
-                                <span>Skip weekends (Saturday &amp; Sunday)</span>
+                                <span><?php esc_html_e('Skip weekends (Saturday & Sunday)', 'scheduler-pro'); ?></span>
                             </label>
                         </div>
 
                         <div class="sp-form-col">
-                            <label class="sp-label">Automation</label>
+                            <label class="sp-label"><?php esc_html_e('Automation', 'scheduler-pro'); ?></label>
                             <label class="sp-checkbox-label">
                                 <input type="checkbox"
                                        name="sp_auto_mode"
                                        value="1"
                                        <?php checked($auto_mode, '1'); ?>>
-                                <span>Enable automatic daily scheduling</span>
+                                <span><?php esc_html_e('Enable automatic daily scheduling', 'scheduler-pro'); ?></span>
                             </label>
                             <p class="sp-help-text">
-                                Runs daily at 00:30 via WP-Cron
+                                <?php esc_html_e('Runs daily at 00:30 via WP-Cron', 'scheduler-pro'); ?>
                             </p>
                         </div>
                     </div>
@@ -151,10 +162,10 @@ function sp_render_settings_tab($preview = null) {
                 <div class="sp-card">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-hidden"></span>
-                        Category Exclusion
+                        <?php esc_html_e('Category Exclusion', 'scheduler-pro'); ?>
                     </h2>
 
-                    <label class="sp-label" for="sp_excluded_categories">Categories never auto-scheduled</label>
+                    <label class="sp-label" for="sp_excluded_categories"><?php esc_html_e('Categories never auto-scheduled', 'scheduler-pro'); ?></label>
                     <select id="sp_excluded_categories"
                             name="sp_excluded_categories[]"
                             class="sp-select-multiple"
@@ -167,7 +178,7 @@ function sp_render_settings_tab($preview = null) {
                         <?php endforeach; ?>
                     </select>
                     <p class="sp-help-text">
-                        Posts in a selected category are entirely skipped by the scheduler (Ctrl/Cmd-click to select several).
+                        <?php esc_html_e('Posts in a selected category are entirely skipped by the scheduler (Ctrl/Cmd-click to select several).', 'scheduler-pro'); ?>
                     </p>
                 </div>
 
@@ -175,7 +186,7 @@ function sp_render_settings_tab($preview = null) {
                 <div class="sp-card">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-email-alt"></span>
-                        Email Alerts
+                        <?php esc_html_e('Email Alerts', 'scheduler-pro'); ?>
                     </h2>
 
                     <label class="sp-checkbox-label">
@@ -183,11 +194,11 @@ function sp_render_settings_tab($preview = null) {
                                name="sp_email_alerts"
                                value="1"
                                <?php checked($email_alerts, '1'); ?>>
-                        <span>Email me if the scheduler stops running (no run for over 25h)</span>
+                        <span><?php esc_html_e('Email me if the scheduler stops running (no run for over 25h)', 'scheduler-pro'); ?></span>
                     </label>
 
                     <div class="sp-form-col">
-                        <label class="sp-label" for="sp_alert_email">Recipient (optional)</label>
+                        <label class="sp-label" for="sp_alert_email"><?php esc_html_e('Recipient (optional)', 'scheduler-pro'); ?></label>
                         <input type="email"
                                id="sp_alert_email"
                                name="sp_alert_email"
@@ -196,7 +207,7 @@ function sp_render_settings_tab($preview = null) {
                                class="sp-input-number sp-input-wide">
                     </div>
                     <p class="sp-help-text">
-                        Leave empty to use the site's admin email. At most one alert every 24 hours.
+                        <?php esc_html_e("Leave empty to use the site's admin email. At most one alert every 24 hours.", 'scheduler-pro'); ?>
                     </p>
                 </div>
 
@@ -204,7 +215,7 @@ function sp_render_settings_tab($preview = null) {
                 <div class="sp-card sp-card-warning">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-image-rotate"></span>
-                        "Full Reset" Mode
+                        <?php esc_html_e('"Full Reset" Mode', 'scheduler-pro'); ?>
                     </h2>
 
                     <label class="sp-checkbox-label">
@@ -212,12 +223,12 @@ function sp_render_settings_tab($preview = null) {
                                name="sp_force_replan"
                                value="1"
                                <?php checked($force_replan, '1'); ?>>
-                        <strong>Force reorganization of ALL future posts</strong>
+                        <strong><?php esc_html_e('Force reorganization of ALL future posts', 'scheduler-pro'); ?></strong>
                     </label>
 
                     <p class="sp-help-text">
-                        ⚠️ <strong>Warning:</strong> This option will reorganize ALL your future posts starting tomorrow.
-                        Current dates will be overwritten. Automatically disables itself after running.
+                        ⚠️ <strong><?php esc_html_e('Warning:', 'scheduler-pro'); ?></strong>
+                        <?php esc_html_e('This option will reorganize ALL your future posts starting tomorrow. Current dates will be overwritten. Automatically disables itself after running.', 'scheduler-pro'); ?>
                     </p>
                 </div>
 
@@ -226,7 +237,7 @@ function sp_render_settings_tab($preview = null) {
                             name="sp_save_settings"
                             class="button button-primary button-hero">
                         <span class="dashicons dashicons-saved"></span>
-                        Save Settings
+                        <?php esc_html_e('Save Settings', 'scheduler-pro'); ?>
                     </button>
                 </div>
             </form>
@@ -237,19 +248,19 @@ function sp_render_settings_tab($preview = null) {
                 <div class="sp-card sp-card-action">
                     <h2 class="sp-card-title">
                         <span class="dashicons dashicons-controls-play"></span>
-                        Manual Run
+                        <?php esc_html_e('Manual Run', 'scheduler-pro'); ?>
                     </h2>
-                    <p>Run the post scheduling immediately (without waiting for the daily cron), or preview the result first without changing anything.</p>
+                    <p><?php esc_html_e('Run the post scheduling immediately (without waiting for the daily cron), or preview the result first without changing anything.', 'scheduler-pro'); ?></p>
                     <div class="sp-actions">
                         <button type="submit"
                                 name="sp_preview_run"
                                 class="button button-hero">
-                            👁️ Preview
+                            👁️ <?php esc_html_e('Preview', 'scheduler-pro'); ?>
                         </button>
                         <button type="submit"
                                 name="sp_run_now"
                                 class="button button-hero sp-btn-action">
-                            🚀 Run Scheduling Now
+                            🚀 <?php esc_html_e('Run Scheduling Now', 'scheduler-pro'); ?>
                         </button>
                     </div>
                 </div>
@@ -259,25 +270,25 @@ function sp_render_settings_tab($preview = null) {
             <div class="sp-card">
                 <h2 class="sp-card-title">
                     <span class="dashicons dashicons-visibility"></span>
-                    Preview Result (not applied)
+                    <?php esc_html_e('Preview Result (not applied)', 'scheduler-pro'); ?>
                 </h2>
 
                 <?php if (empty($preview)): ?>
-                    <p class="sp-help-text">No post would be scheduled with the current settings.</p>
+                    <p class="sp-help-text"><?php esc_html_e('No post would be scheduled with the current settings.', 'scheduler-pro'); ?></p>
                 <?php else: ?>
                     <table class="sp-config-table">
                         <thead>
                             <tr>
-                                <th>Post</th>
-                                <th>Current date</th>
+                                <th><?php esc_html_e('Post', 'scheduler-pro'); ?></th>
+                                <th><?php esc_html_e('Current date', 'scheduler-pro'); ?></th>
                                 <th></th>
-                                <th>New date</th>
+                                <th><?php esc_html_e('New date', 'scheduler-pro'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach (array_slice($preview, 0, 50) as $row): ?>
                                 <tr>
-                                    <td><?php echo esc_html($row['title'] !== '' ? $row['title'] : '(no title)'); ?></td>
+                                    <td><?php echo esc_html($row['title'] !== '' ? $row['title'] : __('(no title)', 'scheduler-pro')); ?></td>
                                     <td><?php echo esc_html($row['old_date']); ?></td>
                                     <td><span class="dashicons dashicons-arrow-right-alt2"></span></td>
                                     <td><strong><?php echo esc_html($row['new_date']); ?></strong></td>
@@ -286,7 +297,15 @@ function sp_render_settings_tab($preview = null) {
                         </tbody>
                     </table>
                     <?php if (count($preview) > 50): ?>
-                        <p class="sp-help-text"><?php echo count($preview) - 50; ?> more post(s) not shown here, but included in the total above.</p>
+                        <p class="sp-help-text">
+                            <?php
+                            printf(
+                                /* translators: %d: number of additional posts not shown in the preview table */
+                                esc_html__('%d more post(s) not shown here, but included in the total above.', 'scheduler-pro'),
+                                count($preview) - 50
+                            );
+                            ?>
+                        </p>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -299,35 +318,41 @@ function sp_render_settings_tab($preview = null) {
 
             <!-- Quick Stats -->
             <div class="sp-card sp-card-stats">
-                <h3>📊 Quick Stats</h3>
+                <h3>📊 <?php esc_html_e('Quick Stats', 'scheduler-pro'); ?></h3>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Future posts</span>
+                    <span class="sp-stat-label"><?php esc_html_e('Future posts', 'scheduler-pro'); ?></span>
                     <span class="sp-stat-value"><?php echo $total_future; ?></span>
                 </div>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Cadence</span>
-                    <span class="sp-stat-value"><?php echo esc_html($cadence_count); ?>/<?php echo esc_html($cadence_unit); ?></span>
+                    <span class="sp-stat-label"><?php esc_html_e('Cadence', 'scheduler-pro'); ?></span>
+                    <span class="sp-stat-value"><?php echo esc_html($cadence_count); ?>/<?php echo esc_html($cadence_unit_labels[$cadence_unit]); ?></span>
                 </div>
                 <div class="sp-stat-item">
-                    <span class="sp-stat-label">Estimated duration</span>
+                    <span class="sp-stat-label"><?php esc_html_e('Estimated duration', 'scheduler-pro'); ?></span>
                     <span class="sp-stat-value">
-                        <?php echo ceil($total_future * $interval_days); ?> days
+                        <?php
+                        printf(
+                            /* translators: %d: estimated duration in days */
+                            esc_html__('%d days', 'scheduler-pro'),
+                            ceil($total_future * $interval_days)
+                        );
+                        ?>
                     </span>
                 </div>
             </div>
 
             <!-- Quick Help -->
             <div class="sp-card sp-card-help">
-                <h3>💡 Quick Help</h3>
+                <h3>💡 <?php esc_html_e('Quick Help', 'scheduler-pro'); ?></h3>
                 <ul class="sp-help-list">
                     <li>
-                        <strong>Adhesive Mode:</strong> New posts are added after the existing schedule
+                        <strong><?php esc_html_e('Adhesive Mode:', 'scheduler-pro'); ?></strong> <?php esc_html_e('New posts are added after the existing schedule', 'scheduler-pro'); ?>
                     </li>
                     <li>
-                        <strong>Full Reset Mode:</strong> Everything is reorganized starting tomorrow
+                        <strong><?php esc_html_e('Full Reset Mode:', 'scheduler-pro'); ?></strong> <?php esc_html_e('Everything is reorganized starting tomorrow', 'scheduler-pro'); ?>
                     </li>
                     <li>
-                        <strong>Locking:</strong> Use the meta box on each post to lock its date
+                        <strong><?php esc_html_e('Locking:', 'scheduler-pro'); ?></strong> <?php esc_html_e('Use the meta box on each post to lock its date', 'scheduler-pro'); ?>
                     </li>
                 </ul>
             </div>
@@ -342,6 +367,12 @@ function sp_render_settings_tab($preview = null) {
         const $unit = $('#sp_cadence_unit');
         const $duration = $('#sp_duration_input');
         const $summary = $('#sp-summary-text');
+        const spSimI18n = {
+            result: <?php echo wp_json_encode(__('Result:', 'scheduler-pro')); ?>,
+            until: <?php echo wp_json_encode(__('until', 'scheduler-pro')); ?>,
+            locale: <?php echo wp_json_encode(str_replace('_', '-', get_locale())); ?>,
+            units: <?php echo wp_json_encode($cadence_unit_labels); ?>
+        };
 
         function intervalDays() {
             const unit = $unit.val();
@@ -359,8 +390,8 @@ function sp_render_settings_tab($preview = null) {
             date.setDate(date.getDate() + days);
 
             $summary.html(`
-                <strong>Result:</strong> ${$count.val()}/${$unit.val()} until
-                <strong>${date.toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'})}</strong>
+                <strong>${spSimI18n.result}</strong> ${$count.val()}/${spSimI18n.units[$unit.val()]} ${spSimI18n.until}
+                <strong>${date.toLocaleDateString(spSimI18n.locale, {day:'numeric', month:'long', year:'numeric'})}</strong>
             `);
         }
 
