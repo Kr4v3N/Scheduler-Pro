@@ -38,7 +38,9 @@ if (!function_exists('sp_process_scheduling')) {
             sp_log("❌ A scheduling run is already in progress - aborting", 'ERROR');
             return array(
                 'success' => false,
-                'message' => 'A scheduling run is already in progress',
+                // Shown in admin notices: translatable, unlike sp_log()
+                // messages which stay in English by design.
+                'message' => __('A scheduling run is already in progress', 'scheduler-pro'),
                 'processed' => 0
             );
         }
@@ -366,8 +368,10 @@ if (!function_exists('sp_process_scheduling')) {
             return array(
                 'success' => true,
                 'message' => $dry_run
-                    ? "{$total_processed} posts would be scheduled"
-                    : "{$total_processed} posts successfully scheduled",
+                    /* translators: %d: number of posts that would be scheduled */
+                    ? sprintf(__('%d posts would be scheduled', 'scheduler-pro'), $total_processed)
+                    /* translators: %d: number of posts actually scheduled */
+                    : sprintf(__('%d posts successfully scheduled', 'scheduler-pro'), $total_processed),
                 'processed' => $total_processed,
                 'preview' => $preview,
             );
@@ -378,7 +382,8 @@ if (!function_exists('sp_process_scheduling')) {
 
             return array(
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
+                /* translators: %s: PHP exception message */
+                'message' => sprintf(__('Error: %s', 'scheduler-pro'), $e->getMessage()),
                 'processed' => 0,
                 'preview' => array(),
             );
