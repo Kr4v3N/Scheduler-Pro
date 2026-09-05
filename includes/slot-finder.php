@@ -10,13 +10,76 @@
 if (!defined('ABSPATH')) exit;
 
 /**
+ * CATEGORY EXCLUSION SQL FRAGMENT
+ *
+ * Shared by the anchor/occupancy queries below: posts belonging to an
+ * excluded category (sp_excluded_categories) must be invisible to the
+ * scheduling math, exactly like they are to the engine's WP_Query
+ * (category__not_in). IDs come from the option and are forced to int,
+ * so the fragment is safe to interpolate.
+ */
+if (!function_exists('sp_get_category_exclusion_sql')) {
+    function sp_get_category_exclusion_sql($posts_alias = 'p') {
+        global $wpdb;
+
+        $excluded_categories = array_map('intval', (array) get_option('sp_excluded_categories', array()));
+
+        if (empty($excluded_categories)) {
+            return '';
+        }
+
+        $ids = implode(',', $excluded_categories);
+
+        return " AND {$posts_alias}.ID NOT IN (
+            SELECT tr.object_id
+            FROM $wpdb->term_relationships tr
+            INNER JOIN $wpdb->term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+            WHERE tt.taxonomy = 'category' AND tt.term_id IN ($ids)
+        )";
+    }
+}
+
+/**
+ * DATE OF THE LAST SCHEDULABLE FUTURE POST
+ *
+ * Anchor for the Adhesive mode ("resume after the last occupied day").
+ * Ignores locked posts (_sp_lock_planning) and excluded categories:
+ * previously a single locked or excluded post dated far ahead (which is
+ * exactly what the lock is for: freezing a specific, often distant date)
+ * would push ALL new scheduling after it.
+ */
+if (!function_exists('sp_get_last_anchor_date')) {
+    function sp_get_last_anchor_date() {
+        global $wpdb;
+
+        $category_sql = sp_get_category_exclusion_sql('p');
+
+        $last_date = $wpdb->get_var("
+            SELECT MAX(DATE(p.post_date))
+            FROM $wpdb->posts p
+            LEFT JOIN $wpdb->postmeta m ON p.ID = m.post_id AND m.meta_key = '_sp_lock_planning'
+            WHERE p.post_status = 'future'
+            AND p.post_type = 'post'
+            AND (m.meta_value IS NULL OR m.meta_value != '1')
+            $category_sql
+        ");
+
+        return $last_date;
+    }
+}
+
+/**
  * COUNT NON-LOCKED POSTS ON A GIVEN DATE
  *
- * IMPORTANT: Only counts posts with post_status = 'future'
+ * IMPORTANT: Only counts posts with post_status = 'future'.
+ * Locked posts and excluded categories don't consume slots (same rule
+ * as the anchor above, so occupancy math stays consistent).
  */
 if (!function_exists('sp_count_non_locked_posts_on_date')) {
     function sp_count_non_locked_posts_on_date($date) {
         global $wpdb;
+
+        $category_sql = sp_get_category_exclusion_sql('p');
 
         $count = (int) $wpdb->get_var($wpdb->prepare("
             SELECT COUNT(DISTINCT p.ID)
@@ -26,6 +89,7 @@ if (!function_exists('sp_count_non_locked_posts_on_date')) {
             AND p.post_type = 'post'
             AND DATE(p.post_date) = %s
             AND (m.meta_value IS NULL OR m.meta_value != '1')
+            $category_sql
         ", $date));
 
         return $count;
@@ -64,14 +128,7 @@ if (!function_exists('sp_skip_weekend_if_needed')) {
  */
 if (!function_exists('sp_get_next_available_slot')) {
     function sp_get_next_available_slot($posts_per_day) {
-        global $wpdb;
-
-        $last_date = $wpdb->get_var("
-            SELECT MAX(DATE(post_date))
-            FROM $wpdb->posts
-            WHERE post_status = 'future'
-            AND post_type = 'post'
-        ");
+        $last_date = sp_get_last_anchor_date();
 
         if (!$last_date) {
             $start_date = sp_skip_weekend_if_needed(date('Y-m-d', strtotime('+1 day', current_time('timestamp'))));
@@ -207,14 +264,7 @@ if (!function_exists('sp_advance_cadence_date')) {
  */
 if (!function_exists('sp_get_cadence_anchor_date')) {
     function sp_get_cadence_anchor_date() {
-        global $wpdb;
-
-        $last_date = $wpdb->get_var("
-            SELECT MAX(DATE(post_date))
-            FROM $wpdb->posts
-            WHERE post_status = 'future'
-            AND post_type = 'post'
-        ");
+        $last_date = sp_get_last_anchor_date();
 
         $today = date('Y-m-d', current_time('timestamp'));
 
