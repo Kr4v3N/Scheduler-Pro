@@ -381,19 +381,16 @@ No external connections, no tracking, no telemetry.
 
 == Roadmap ==
 
-**v2.1 (Q2 2026)**
+Ideas under consideration for future versions (no committed dates):
+
 * Action Scheduler integration (WP-Cron alternative)
 * REST API for external control
 * Configuration export/import
 * Multiple scheduling profiles
-
-**v2.2 (Q3 2026)**
 * Custom Post Type support
-* Conditional scheduling (categories, tags)
+* Conditional scheduling beyond categories (tags, authors)
 * Event webhooks
 * Native Google Search Console integration
-
-**v3.0 (Q4 2026)**
 * Modern React interface
 * Advanced analytics dashboard
 * Machine learning for automatic optimization
