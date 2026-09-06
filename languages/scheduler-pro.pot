@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Scheduler Pro 2.6.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-06 01:34+0200\n"
+"POT-Creation-Date: 2026-09-06 02:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,269 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#. translators: %1$s: plugin name (bold), %2$s: currently installed PHP version
+#: scheduler-pro.php:20
+#, php-format
+msgid "%1$s requires PHP 7.4 or higher. Your current version: %2$s"
+msgstr ""
+
+#. translators: %s: plugin version number
+#: scheduler-pro.php:165
+#, php-format
+msgid "Scheduler Pro v%s activated successfully!"
+msgstr ""
+
+#: scheduler-pro.php:171
+msgid ""
+"Automatic, human-like post scheduling is ready. Review your settings, then "
+"use the Preview button to simulate a run before launching it for real."
+msgstr ""
+
+#: scheduler-pro.php:175
+msgid "Configure Now"
+msgstr ""
+
+#: scheduler-pro.php:178
+msgid "View Monitoring"
+msgstr ""
+
+#: scheduler-pro.php:191 includes/admin/menu.php:67
+msgid "Settings"
+msgstr ""
+
+#: scheduler-pro.php:192 includes/admin/menu.php:72
+msgid "Monitoring"
+msgstr ""
+
+#: scheduler-pro.php:227
+msgid "Processing..."
+msgstr ""
+
+#: scheduler-pro.php:269 includes/heartbeat-monitor.php:557
+#: includes/admin/menu.php:26
+msgid "Access denied"
+msgstr ""
+
+#: includes/engine.php:43
+msgid "A scheduling run is already in progress"
+msgstr ""
+
+#. translators: %d: number of posts that would be scheduled
+#: includes/engine.php:372
+#, php-format
+msgid "%d posts would be scheduled"
+msgstr ""
+
+#. translators: %d: number of posts actually scheduled
+#: includes/engine.php:374
+#, php-format
+msgid "%d posts successfully scheduled"
+msgstr ""
+
+#. translators: %s: PHP exception message
+#: includes/engine.php:386
+#, php-format
+msgid "Error: %s"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:52
+msgid "No run recorded"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:53
+msgid "The scheduler has never run yet, or was just installed."
+msgstr ""
+
+#: includes/heartbeat-monitor.php:59
+msgid "Unknown"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:66
+msgid "Scheduler running normally"
+msgstr ""
+
+#. translators: 1: last run date/time, 2: human-readable time elapsed since then
+#: includes/heartbeat-monitor.php:69
+#, php-format
+msgid "Last run: %1$s (%2$s ago)"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:81
+msgid "Scheduler inactive!"
+msgstr ""
+
+#. translators: 1: last run date/time, 2: human-readable time elapsed since then
+#: includes/heartbeat-monitor.php:84
+#, php-format
+msgid ""
+"Last run: %1$s (%2$s ago). WP-Cron does not appear to be working correctly."
+msgstr ""
+
+#: includes/heartbeat-monitor.php:137
+msgid "WP-Cron is disabled in wp-config.php"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:138
+msgid "Set up a real server cron or re-enable WP-Cron"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:148
+msgid "No scheduled task found"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:149
+msgid "Deactivate then reactivate the plugin"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:160
+msgid "Check that your site is receiving traffic, or set up a server cron"
+msgstr ""
+
+#. translators: %d: number of stuck tasks detected
+#: includes/heartbeat-monitor.php:182
+#, php-format
+msgid "%d stuck task(s) detected"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:185
+msgid "Run the automatic cleanup or restart the scheduler"
+msgstr ""
+
+#. translators: %s: PHP memory_limit value, e.g. "64M"
+#: includes/heartbeat-monitor.php:203
+#, php-format
+msgid "Limited PHP memory: %s"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:206
+msgid "Increase memory_limit to at least 128M in php.ini"
+msgstr ""
+
+#. translators: %s: site name
+#: includes/heartbeat-monitor.php:248
+#, php-format
+msgid "[%s] Scheduler Pro: scheduler inactive"
+msgstr ""
+
+#. translators: 1: alert threshold in hours, 2: health description, 3: URL to the Monitoring tab
+#: includes/heartbeat-monitor.php:253
+#, php-format
+msgid ""
+"Scheduler Pro has not run in over %1$d hours.\n"
+"\n"
+"%2$s\n"
+"\n"
+"Check the Monitoring tab: %3$s"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:280 includes/admin/tab-monitoring.php:74
+msgid "Scheduler Status"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:282
+msgid "Status:"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:287 includes/heartbeat-monitor.php:360
+#: includes/admin/tab-monitoring.php:91
+msgid "Next run:"
+msgstr ""
+
+#. translators: %s: human-readable time until the next run, e.g. "3 hours"
+#: includes/heartbeat-monitor.php:292 includes/admin/tab-monitoring.php:96
+#, php-format
+msgid "(in %s)"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:301 includes/admin/tab-monitoring.php:111
+msgid "Issues Detected"
+msgstr ""
+
+#. translators: %s: suggested solution to the detected issue
+#: includes/heartbeat-monitor.php:310
+#, php-format
+msgid "Solution: %s"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:325
+msgid "Guide: Set Up a Real Server Cron"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:330
+msgid "Test WP-Cron"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:371
+msgid "Cron Guide"
+msgstr ""
+
+#. translators: %s: comma-separated list of cron event names
+#: includes/heartbeat-monitor.php:414
+#, php-format
+msgid ""
+"Cron event(s) not scheduled: %s. Deactivate then reactivate the plugin to "
+"recreate them."
+msgstr ""
+
+#: includes/heartbeat-monitor.php:426
+msgid ""
+"WP-Cron is disabled (DISABLE_WP_CRON): the events are scheduled, but "
+"WordPress will not trigger them automatically. Make sure a real server cron "
+"calls wp-cron.php regularly."
+msgstr ""
+
+#. translators: 1: next scheduling run date, 2: next cleanup run date
+#: includes/heartbeat-monitor.php:443
+#, php-format
+msgid ""
+"WP-Cron OK. Next scheduling run: %1$s. Next cleanup: %2$s. A wp-cron.php "
+"request was triggered to run any overdue event now."
+msgstr ""
+
+#: includes/heartbeat-monitor.php:456
+msgid "Scheduler Pro - Monitoring"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:478
+msgid "Posts Awaiting Publication"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:483
+msgid "Cron Status"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:485
+msgid "OK"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:485
+msgid "Issue"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:491
+msgid "Task Queue"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:494
+msgid "Pending:"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:497
+msgid "Running:"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:500
+msgid "Completed:"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:503
+msgid "Failed:"
+msgstr ""
+
+#: includes/heartbeat-monitor.php:512
+msgid "Go to Settings"
+msgstr ""
 
 #: includes/admin/actions.php:40
 msgid "Settings saved successfully!"
@@ -53,25 +316,12 @@ msgstr ""
 msgid "Test complete."
 msgstr ""
 
-#: includes/admin/menu.php:26 includes/heartbeat-monitor.php:557
-#: scheduler-pro.php:274
-msgid "Access denied"
-msgstr ""
-
 #: includes/admin/menu.php:47
 msgid "Scheduler Running"
 msgstr ""
 
 #: includes/admin/menu.php:52
 msgid "Issue Detected"
-msgstr ""
-
-#: includes/admin/menu.php:67 scheduler-pro.php:196
-msgid "Settings"
-msgstr ""
-
-#: includes/admin/menu.php:72 scheduler-pro.php:197
-msgid "Monitoring"
 msgstr ""
 
 #: includes/admin/menu.php:77 includes/admin/tab-logs.php:22
@@ -118,7 +368,7 @@ msgid ""
 "posts/day"
 msgstr ""
 
-#: includes/admin/tab-about.php:25 scheduler-pro.php:173
+#: includes/admin/tab-about.php:25
 msgid "Category exclusion"
 msgstr ""
 
@@ -126,7 +376,7 @@ msgstr ""
 msgid "keep entire categories out of auto-scheduling"
 msgstr ""
 
-#: includes/admin/tab-about.php:26 scheduler-pro.php:174
+#: includes/admin/tab-about.php:26
 msgid "Preview before running"
 msgstr ""
 
@@ -134,7 +384,7 @@ msgstr ""
 msgid "see the exact resulting dates before committing anything"
 msgstr ""
 
-#: includes/admin/tab-about.php:27 scheduler-pro.php:175
+#: includes/admin/tab-about.php:27
 msgid "Email alerts"
 msgstr ""
 
@@ -142,7 +392,7 @@ msgstr ""
 msgid "get notified if the scheduler stops running"
 msgstr ""
 
-#: includes/admin/tab-about.php:28 scheduler-pro.php:176
+#: includes/admin/tab-about.php:28
 msgid "Calendar view"
 msgstr ""
 
@@ -304,25 +554,6 @@ msgstr ""
 
 #: includes/admin/tab-monitoring.php:64
 msgid "Failed Tasks"
-msgstr ""
-
-#: includes/admin/tab-monitoring.php:74 includes/heartbeat-monitor.php:280
-msgid "Scheduler Status"
-msgstr ""
-
-#: includes/admin/tab-monitoring.php:91 includes/heartbeat-monitor.php:287
-#: includes/heartbeat-monitor.php:360
-msgid "Next run:"
-msgstr ""
-
-#. translators: %s: human-readable time until the next run, e.g. "3 hours"
-#: includes/admin/tab-monitoring.php:96 includes/heartbeat-monitor.php:292
-#, php-format
-msgid "(in %s)"
-msgstr ""
-
-#: includes/admin/tab-monitoring.php:111 includes/heartbeat-monitor.php:301
-msgid "Issues Detected"
 msgstr ""
 
 #: includes/admin/tab-monitoring.php:121
@@ -601,237 +832,4 @@ msgstr ""
 
 #: includes/admin/tab-settings.php:372
 msgid "until"
-msgstr ""
-
-#: includes/engine.php:43
-msgid "A scheduling run is already in progress"
-msgstr ""
-
-#. translators: %d: number of posts that would be scheduled
-#: includes/engine.php:372
-#, php-format
-msgid "%d posts would be scheduled"
-msgstr ""
-
-#. translators: %d: number of posts actually scheduled
-#: includes/engine.php:374
-#, php-format
-msgid "%d posts successfully scheduled"
-msgstr ""
-
-#. translators: %s: PHP exception message
-#: includes/engine.php:386
-#, php-format
-msgid "Error: %s"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:52
-msgid "No run recorded"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:53
-msgid "The scheduler has never run yet, or was just installed."
-msgstr ""
-
-#: includes/heartbeat-monitor.php:59
-msgid "Unknown"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:66
-msgid "Scheduler running normally"
-msgstr ""
-
-#. translators: 1: last run date/time, 2: human-readable time elapsed since then
-#: includes/heartbeat-monitor.php:69
-#, php-format
-msgid "Last run: %1$s (%2$s ago)"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:81
-msgid "Scheduler inactive!"
-msgstr ""
-
-#. translators: 1: last run date/time, 2: human-readable time elapsed since then
-#: includes/heartbeat-monitor.php:84
-#, php-format
-msgid ""
-"Last run: %1$s (%2$s ago). WP-Cron does not appear to be working correctly."
-msgstr ""
-
-#: includes/heartbeat-monitor.php:137
-msgid "WP-Cron is disabled in wp-config.php"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:138
-msgid "Set up a real server cron or re-enable WP-Cron"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:148
-msgid "No scheduled task found"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:149
-msgid "Deactivate then reactivate the plugin"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:160
-msgid "Check that your site is receiving traffic, or set up a server cron"
-msgstr ""
-
-#. translators: %d: number of stuck tasks detected
-#: includes/heartbeat-monitor.php:182
-#, php-format
-msgid "%d stuck task(s) detected"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:185
-msgid "Run the automatic cleanup or restart the scheduler"
-msgstr ""
-
-#. translators: %s: PHP memory_limit value, e.g. "64M"
-#: includes/heartbeat-monitor.php:203
-#, php-format
-msgid "Limited PHP memory: %s"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:206
-msgid "Increase memory_limit to at least 128M in php.ini"
-msgstr ""
-
-#. translators: %s: site name
-#: includes/heartbeat-monitor.php:248
-#, php-format
-msgid "[%s] Scheduler Pro: scheduler inactive"
-msgstr ""
-
-#. translators: 1: alert threshold in hours, 2: health description, 3: URL to the Monitoring tab
-#: includes/heartbeat-monitor.php:253
-#, php-format
-msgid ""
-"Scheduler Pro has not run in over %1$d hours.\n"
-"\n"
-"%2$s\n"
-"\n"
-"Check the Monitoring tab: %3$s"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:282
-msgid "Status:"
-msgstr ""
-
-#. translators: %s: suggested solution to the detected issue
-#: includes/heartbeat-monitor.php:310
-#, php-format
-msgid "Solution: %s"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:325
-msgid "Guide: Set Up a Real Server Cron"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:330
-msgid "Test WP-Cron"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:371
-msgid "Cron Guide"
-msgstr ""
-
-#. translators: %s: comma-separated list of cron event names
-#: includes/heartbeat-monitor.php:414
-#, php-format
-msgid ""
-"Cron event(s) not scheduled: %s. Deactivate then reactivate the plugin to "
-"recreate them."
-msgstr ""
-
-#: includes/heartbeat-monitor.php:426
-msgid ""
-"WP-Cron is disabled (DISABLE_WP_CRON): the events are scheduled, but "
-"WordPress will not trigger them automatically. Make sure a real server cron "
-"calls wp-cron.php regularly."
-msgstr ""
-
-#. translators: 1: next scheduling run date, 2: next cleanup run date
-#: includes/heartbeat-monitor.php:443
-#, php-format
-msgid ""
-"WP-Cron OK. Next scheduling run: %1$s. Next cleanup: %2$s. A wp-cron.php "
-"request was triggered to run any overdue event now."
-msgstr ""
-
-#: includes/heartbeat-monitor.php:456
-msgid "Scheduler Pro - Monitoring"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:478
-msgid "Posts Awaiting Publication"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:483
-msgid "Cron Status"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:485
-msgid "OK"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:485
-msgid "Issue"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:491
-msgid "Task Queue"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:494
-msgid "Pending:"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:497
-msgid "Running:"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:500
-msgid "Completed:"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:503
-msgid "Failed:"
-msgstr ""
-
-#: includes/heartbeat-monitor.php:512
-msgid "Go to Settings"
-msgstr ""
-
-#. translators: %1$s: plugin name (bold), %2$s: currently installed PHP version
-#: scheduler-pro.php:20
-#, php-format
-msgid "%1$s requires PHP 7.4 or higher. Your current version: %2$s"
-msgstr ""
-
-#. translators: %s: plugin version number
-#: scheduler-pro.php:165
-#, php-format
-msgid "Scheduler Pro v%s activated successfully!"
-msgstr ""
-
-#: scheduler-pro.php:171
-msgid "What's new in this version:"
-msgstr ""
-
-#: scheduler-pro.php:172
-msgid "Flexible cadence (day/week/month)"
-msgstr ""
-
-#: scheduler-pro.php:180
-msgid "Configure Now"
-msgstr ""
-
-#: scheduler-pro.php:183
-msgid "View Monitoring"
-msgstr ""
-
-#: scheduler-pro.php:232
-msgid "Processing..."
 msgstr ""

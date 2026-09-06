@@ -168,12 +168,7 @@ add_action('admin_notices', function() {
                 ?>
             </h3>
             <p>
-                <strong><?php esc_html_e("What's new in this version:", 'scheduler-pro'); ?></strong>
-                ✅ <?php esc_html_e('Flexible cadence (day/week/month)', 'scheduler-pro'); ?>
-                ✅ <?php esc_html_e('Category exclusion', 'scheduler-pro'); ?>
-                ✅ <?php esc_html_e('Preview before running', 'scheduler-pro'); ?>
-                ✅ <?php esc_html_e('Email alerts', 'scheduler-pro'); ?>
-                ✅ <?php esc_html_e('Calendar view', 'scheduler-pro'); ?>
+                <?php esc_html_e('Automatic, human-like post scheduling is ready. Review your settings, then use the Preview button to simulate a run before launching it for real.', 'scheduler-pro'); ?>
             </p>
             <p>
                 <a href="<?php echo admin_url('admin.php?page=scheduler-pro'); ?>" class="button button-primary">
