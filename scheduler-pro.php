@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Scheduler Pro
  * Description: Automatic, human-like post scheduling with an advanced monitoring system.
- * Version: 2.6.4
+ * Version: 2.6.5
  * Author: Kr4v3n
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -27,7 +27,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 }
 
 // Path constants
-define('SP_VERSION', '2.6.4');
+define('SP_VERSION', '2.6.5');
 define('SP_PATH', plugin_dir_path(__FILE__));
 define('SP_URL', plugin_dir_url(__FILE__));
 define('SP_BASENAME', plugin_basename(__FILE__));

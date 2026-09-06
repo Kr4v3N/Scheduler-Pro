@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.4
+Stable tag: 2.6.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,11 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.5 - 2026-09-06 =
+
+**🔧 Fix**
+* Activation notice: the "What's new in this version" list was hardcoded and had not been updated since v2.6.0, so every activation showed features from several versions ago. Replaced with a timeless generic message (also added to the French translation).
 
 = 2.6.4 - 2026-09-06 =
 
