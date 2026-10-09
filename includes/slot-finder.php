@@ -47,6 +47,15 @@ if (!function_exists('sp_get_category_exclusion_sql')) {
  * previously a single locked or excluded post dated far ahead (which is
  * exactly what the lock is for: freezing a specific, often distant date)
  * would push ALL new scheduling after it.
+ *
+ * Only posts whose date was written by the engine itself count: each such
+ * post carries the protected meta _sp_engine_date holding the exact
+ * post_date the engine gave it, and it counts only while post_date still
+ * matches. A date typed by a user (a new post, or an edit of a post the
+ * engine already placed) can therefore never define the anchor: an Author
+ * dating one of their own posts in 2099 used to push every other user's
+ * queue after it. Posts the engine has not placed yet don't need to count,
+ * the current run is about to place them.
  */
 if (!function_exists('sp_get_last_anchor_date')) {
     function sp_get_last_anchor_date() {
@@ -57,6 +66,7 @@ if (!function_exists('sp_get_last_anchor_date')) {
         $last_date = $wpdb->get_var("
             SELECT MAX(DATE(p.post_date))
             FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta e ON p.ID = e.post_id AND e.meta_key = '_sp_engine_date' AND e.meta_value = p.post_date
             LEFT JOIN $wpdb->postmeta m ON p.ID = m.post_id AND m.meta_key = '_sp_lock_planning'
             WHERE p.post_status = 'future'
             AND p.post_type = 'post'
@@ -65,6 +75,48 @@ if (!function_exists('sp_get_last_anchor_date')) {
         ");
 
         return $last_date;
+    }
+}
+
+/**
+ * ONE-TIME SEED OF _sp_engine_date FOR POSTS PLACED BY OLDER VERSIONS
+ *
+ * Before _sp_engine_date existed, the engine only set _is_smart_scheduled.
+ * Without this seed, an existing queue would be invisible to
+ * sp_get_last_anchor_date() and the next Adhesive run would restart from
+ * tomorrow, in the middle of it. Each already-placed future post gets its
+ * current post_date recorded as its engine date. Runs once (option
+ * sp_engine_dates_seeded), from the plugins_loaded hook, never from the
+ * engine, so a preview stays a pure read.
+ *
+ * Limit: dates already tampered with before this seed are trusted as they
+ * are; only later edits are detected.
+ */
+if (!function_exists('sp_seed_engine_dates')) {
+    function sp_seed_engine_dates() {
+        global $wpdb;
+
+        // Anti-join (LEFT JOIN ... IS NULL) rather than NOT EXISTS: MySQL
+        // does not allow a subquery on the table being inserted into.
+        $result = $wpdb->query("
+            INSERT INTO $wpdb->postmeta (post_id, meta_key, meta_value)
+            SELECT p.ID, '_sp_engine_date', p.post_date
+            FROM $wpdb->posts p
+            INNER JOIN $wpdb->postmeta s ON p.ID = s.post_id AND s.meta_key = '_is_smart_scheduled' AND s.meta_value = '1'
+            LEFT JOIN $wpdb->postmeta e ON e.post_id = p.ID AND e.meta_key = '_sp_engine_date'
+            WHERE p.post_status = 'future'
+            AND p.post_type = 'post'
+            AND e.meta_id IS NULL
+        ");
+
+        // A failed seed must not be marked as done, or the existing queue
+        // would stay invisible to the anchor for good: retry next request.
+        if ($result === false) {
+            sp_log("❌ ERROR: seeding _sp_engine_date failed, will retry on the next request", 'ERROR');
+            return;
+        }
+
+        update_option('sp_engine_dates_seeded', '1');
     }
 }
 
@@ -252,8 +304,9 @@ if (!function_exists('sp_advance_cadence_date')) {
 
 /**
  * Starting anchor date for cadence-based scheduling in Adhesive mode:
- * the date of the last currently-scheduled FUTURE post, or today if none
- * exists or it's already in the past. sp_advance_cadence_date() is then
+ * the date of the last FUTURE post the engine itself placed (see
+ * sp_get_last_anchor_date()), or today if none exists or it's already in
+ * the past. sp_advance_cadence_date() is then
  * applied on top of this anchor for the first post, guaranteeing the
  * result never lands earlier than tomorrow.
  *

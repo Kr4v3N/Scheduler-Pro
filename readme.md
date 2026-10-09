@@ -4,7 +4,7 @@ Tags: scheduler, scheduling, seo, automation, cron, publication
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 2.6.5
+Stable tag: 2.6.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,14 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 6. **Scheduler Status** - Real-time health indicators
 
 == Changelog ==
+
+= 2.6.6 - 2026-10-09 =
+
+**🔒 Security**
+* The dashboard widget and the critical-status notice, which show server diagnostics, are now reserved to users who can manage the plugin (`manage_options`). Before, any logged-in user saw them.
+* The critical-status alert email is now claimed atomically before it is sent, so concurrent anonymous requests to `admin-ajax.php` can no longer trigger several emails within the same 24-hour window. If the email fails to send, the next attempt happens after the window, not on every request.
+* The "Test WP-Cron" result no longer travels in the URL (a crafted link could display a forged notice); it is kept for 60 seconds per user instead.
+* Adhesive mode: the resume anchor no longer trusts dates typed by users. On a multi-author site, an Author who dated one of their own posts in 2099 (or edited the date of a post already placed by the plugin) used to push every other user's queue after it. The engine now records the exact date it gave each post (`_sp_engine_date`) and the anchor only counts posts still carrying that date. Posts placed by earlier versions are recorded once, on the first load after the update. A post the plugin placed and that was later re-dated by hand no longer counts as the anchor; use the per-post lock to freeze a distant date.
 
 = 2.6.5 - 2026-09-06 =
 

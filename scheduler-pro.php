@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Scheduler Pro
  * Description: Automatic, human-like post scheduling with an advanced monitoring system.
- * Version: 2.6.5
+ * Version: 2.6.6
  * Author: Kr4v3n
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -27,7 +27,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 }
 
 // Path constants
-define('SP_VERSION', '2.6.5');
+define('SP_VERSION', '2.6.6');
 define('SP_PATH', plugin_dir_path(__FILE__));
 define('SP_URL', plugin_dir_url(__FILE__));
 define('SP_BASENAME', plugin_basename(__FILE__));
@@ -233,6 +233,13 @@ add_action('admin_enqueue_scripts', function($hook) {
  * Check for DB schema updates
  */
 add_action('plugins_loaded', function() {
+    // One-time seed of _sp_engine_date on posts placed by older versions
+    // (see sp_seed_engine_dates()). Independent from the version check:
+    // a fix must not wait for a version bump to protect existing queues.
+    if (get_option('sp_engine_dates_seeded', '0') !== '1' && function_exists('sp_seed_engine_dates')) {
+        sp_seed_engine_dates();
+    }
+
     $installed_version = get_option('sp_version', '0');
 
     if (version_compare($installed_version, SP_VERSION, '<')) {

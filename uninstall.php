@@ -29,6 +29,7 @@ $options = array(
     'sp_last_cron_run',
     'sp_last_cron_date',
     'sp_last_manual_test',
+    'sp_engine_dates_seeded',
 );
 
 foreach ($options as $option) {
@@ -48,6 +49,7 @@ $wpdb->query($wpdb->prepare(
 // 4. Clean up post metadata
 $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_is_smart_scheduled'");
 $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_sp_lock_planning'");
+$wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_sp_engine_date'");
 
 // 5. Drop the queue table
 $table_name = $wpdb->prefix . 'scheduler_queue';

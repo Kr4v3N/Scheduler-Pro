@@ -290,6 +290,12 @@ if (!function_exists('sp_process_scheduling')) {
                     if (!$dry_run) {
                         // Mark as scheduled
                         update_post_meta($post_id, '_is_smart_scheduled', '1');
+                        // Exact date the engine wrote: the Adhesive anchor
+                        // (sp_get_last_anchor_date) only trusts a post while
+                        // its post_date still equals this value.
+                        // Re-read rather than reuse $new_date, in case a
+                        // third-party filter adjusted the date on save.
+                        update_post_meta($post_id, '_sp_engine_date', get_post_field('post_date', $post_id));
                     }
 
                     sp_log(($dry_run ? "👁️ [Preview] Post ID {$post_id} → {$new_date}" : "✅ Post ID {$post_id} → {$new_date}"), 'SUCCESS');
