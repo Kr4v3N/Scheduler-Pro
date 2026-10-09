@@ -284,7 +284,7 @@ No. The scheduler runs in the background (via cron) and has no impact on front-e
 * Corrected the documentation: the queue table provides traceability/history, it does not (yet) drive automatic retries
 
 **🧱 Architecture**
-* Split the plugin into modular files by responsibility (`includes/logger.php`, `includes/memory-guard.php`, `includes/time-helpers.php`, `includes/slot-finder.php`, `includes/admin/*.php`) to make maintenance easier — no functional behavior change beyond the fixes listed above
+* Split the plugin into modular files by responsibility (`includes/logger.php`, `includes/memory-guard.php`, `includes/time-helpers.php`, `includes/slot-finder.php`, `includes/admin/*.php`) to make maintenance easier - no functional behavior change beyond the fixes listed above
 
 = 2.0.0 - 2026-02-09 =
 
