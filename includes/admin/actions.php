@@ -3,8 +3,9 @@
  * ADMIN: ACTION HANDLING - Scheduler Pro v2.6
  *
  * Processes form submissions (saving settings, manual run) and the
- * manual cron test result (includes/heartbeat-monitor.php redirects to
- * ?test_result=...) before any HTML is rendered on the admin page.
+ * manual cron test result (includes/heartbeat-monitor.php stores it in a
+ * transient and redirects to ?test_done=1) before any HTML is rendered on
+ * the admin page.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -94,12 +95,20 @@ function sp_handle_admin_actions() {
     }
 
     // Result of the manual WP-Cron test (see includes/heartbeat-monitor.php,
-    // 'test_cron' action, which redirects here with these two parameters)
-    if (isset($_GET['test_result']) && isset($_GET['page']) && $_GET['page'] === 'scheduler-pro') {
-        $message = array(
-            'type' => $_GET['test_result'] === 'success' ? 'success' : 'error',
-            'text' => isset($_GET['test_message']) ? sanitize_text_field(wp_unslash($_GET['test_message'])) : __('Test complete.', 'scheduler-pro'),
-        );
+    // 'test_cron' action, which stores the result in a short-lived per-user
+    // transient and redirects here with a bare test_done flag). The notice
+    // text never comes from the URL, so a crafted link cannot spoof it.
+    if (isset($_GET['test_done']) && isset($_GET['page']) && $_GET['page'] === 'scheduler-pro') {
+        $transient_key = 'sp_test_cron_result_' . get_current_user_id();
+        $test_result   = get_transient($transient_key);
+
+        if (is_array($test_result) && isset($test_result['type'], $test_result['text'])) {
+            delete_transient($transient_key);
+            $message = array(
+                'type' => $test_result['type'] === 'success' ? 'success' : 'error',
+                'text' => (string) $test_result['text'],
+            );
+        }
     }
 
     return array('message' => $message, 'preview' => $preview);

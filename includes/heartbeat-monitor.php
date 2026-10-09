@@ -220,6 +220,14 @@ class SP_Heartbeat_Monitor {
      * this alert exists to report), a cron-triggered check would never
      * fire. Running on admin_init instead means the very next admin page
      * load after things break will send the alert.
+     *
+     * admin_init also fires for unauthenticated requests to admin-ajax.php
+     * and admin-post.php, so this method can be reached by anyone. The
+     * throttle is therefore RESERVED atomically (claim_alert_slot()) BEFORE
+     * wp_mail() is called: concurrent requests can no longer all pass a
+     * read-then-write check and each send an email. Consequence: if
+     * wp_mail() fails, the slot stays taken and the next attempt happens
+     * after the throttle window, not on every following request.
      */
     public static function maybe_send_alert_email() {
         if (get_option('sp_email_alerts', '1') !== '1') {
@@ -235,6 +243,13 @@ class SP_Heartbeat_Monitor {
         $throttle_seconds = self::ALERT_EMAIL_THROTTLE_HOURS * HOUR_IN_SECONDS;
 
         if ($last_sent && (time() - $last_sent) < $throttle_seconds) {
+            return;
+        }
+
+        // The check above is only a cheap fast path (it may read a stale
+        // value): the atomic reservation below is what actually guarantees
+        // a single sender per throttle window.
+        if (!self::claim_alert_slot($throttle_seconds)) {
             return;
         }
 
@@ -256,14 +271,76 @@ class SP_Heartbeat_Monitor {
             admin_url('admin.php?page=scheduler-pro&tab=monitoring')
         );
 
+        // The throttle slot was already reserved by claim_alert_slot(): do
+        // not write it again here, and do not release it on failure (a
+        // failing wp_mail() must not be retried by every incoming request).
         $sent = wp_mail($to, $subject, $body);
 
         if ($sent) {
-            update_option('sp_last_alert_sent', time());
             sp_log("📧 Alert email sent to {$to} (scheduler critical)", 'WARNING');
         } else {
-            sp_log("❌ Failed to send the alert email to {$to}", 'ERROR');
+            sp_log("❌ Failed to send the alert email to {$to} (next attempt after the throttle window)", 'ERROR');
         }
+    }
+
+    /**
+     * Atomically reserve the right to send the alert email.
+     *
+     * Same technique as SP_Lock_Manager::acquire() (see the header of
+     * includes/lock-manager.php for why add_option()/update_option() are
+     * not atomic): INSERT IGNORE for the very first alert, then an UPDATE
+     * conditioned on the value just read (compare-and-swap) once the
+     * previous throttle window has expired. Only one concurrent caller can
+     * get a non-zero affected-row count, so only one of them returns true.
+     *
+     * The value is read with direct SQL, never get_option(), so a stale
+     * object cache can neither grant nor refuse a slot wrongly.
+     *
+     * @param int $throttle_seconds Minimum delay between two alert emails
+     * @return bool True if the caller now owns the slot and must send the email
+     */
+    private static function claim_alert_slot($throttle_seconds) {
+        global $wpdb;
+
+        $key = 'sp_last_alert_sent';
+        $now = time();
+        $claimed = false;
+
+        $inserted = $wpdb->query($wpdb->prepare(
+            "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
+            $key, $now
+        ));
+
+        if ($inserted === 1) {
+            $claimed = true;
+        } else {
+            $existing = (string) $wpdb->get_var($wpdb->prepare(
+                "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+                $key
+            ));
+            $last_sent = (int) $existing;
+
+            // Within the window (a value of 0 means "never sent", as before)
+            if ($last_sent && ($now - $last_sent) < $throttle_seconds) {
+                return false;
+            }
+
+            $updated = $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
+                $now, $key, $existing
+            ));
+            $claimed = ($updated === 1);
+        }
+
+        if ($claimed) {
+            // Raw SQL bypassed the options cache: drop every entry that could
+            // still hold the previous state of this option.
+            wp_cache_delete($key, 'options');
+            wp_cache_delete('alloptions', 'options');
+            wp_cache_delete('notoptions', 'options');
+        }
+
+        return $claimed;
     }
 
     /**
@@ -451,6 +528,12 @@ class SP_Heartbeat_Monitor {
      * WordPress Dashboard Widget
      */
     public static function add_dashboard_widget() {
+        // Same capability as the plugin's own admin page (menu.php): the widget
+        // exposes queue counters and cron state meant for administrators only
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
         wp_add_dashboard_widget(
             'sp_heartbeat_dashboard',
             '💓 ' . __('Scheduler Pro - Monitoring', 'scheduler-pro'),
@@ -532,6 +615,12 @@ add_action('admin_init', array('SP_Heartbeat_Monitor', 'maybe_send_alert_email')
 
 // Display the status widget in the admin
 add_action('admin_notices', function() {
+    // The notice lists server diagnostics (PHP memory limit, DISABLE_WP_CRON,
+    // stuck tasks): administrators only, like the plugin's own admin page
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
     $screen = get_current_screen();
 
     // Only display on the plugin's own page
@@ -561,11 +650,22 @@ add_action('admin_init', function() {
 
         $result = SP_Heartbeat_Monitor::test_cron_execution();
 
+        // Keep the result server-side (short-lived, per user) instead of in the
+        // redirect URL: text read back from the URL could be forged by anyone
+        // able to get an administrator to follow a crafted link.
+        set_transient(
+            'sp_test_cron_result_' . get_current_user_id(),
+            array(
+                'type' => $result['success'] ? 'success' : 'error',
+                'text' => $result['message'],
+            ),
+            60
+        );
+
         $redirect_url = add_query_arg(
             array(
                 'page' => 'scheduler-pro',
-                'test_result' => $result['success'] ? 'success' : 'error',
-                'test_message' => urlencode($result['message'])
+                'test_done' => '1'
             ),
             admin_url('admin.php')
         );
